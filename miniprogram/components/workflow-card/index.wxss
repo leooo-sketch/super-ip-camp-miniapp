@@ -1,0 +1,105 @@
+.workflow-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 244rpx;
+  padding: 24rpx;
+  background: #fff;
+  border: 1rpx solid #e4e6ea;
+  border-top: 7rpx solid #e63b32;
+  border-radius: 12rpx;
+}
+
+.workflow-card.is-disabled {
+  opacity: 0.62;
+}
+
+.accent-teal {
+  border-top-color: #147d78;
+}
+
+.accent-yellow {
+  border-top-color: #f1b932;
+}
+
+.card-topline,
+.card-footer {
+  display: flex;
+  align-items: center;
+}
+
+.card-topline {
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.category {
+  color: #777a80;
+  font-size: 20rpx;
+  font-weight: 650;
+}
+
+.badge {
+  padding: 5rpx 12rpx;
+  color: #8f241f;
+  background: #ffe9e7;
+  border-radius: 999rpx;
+  font-size: 18rpx;
+  font-weight: 650;
+}
+
+.accent-teal .badge {
+  color: #0e635f;
+  background: #dff4f2;
+}
+
+.accent-yellow .badge {
+  color: #7b5600;
+  background: #fff1c7;
+}
+
+.card-title {
+  font-size: 31rpx;
+  line-height: 1.3;
+  font-weight: 750;
+}
+
+.card-subtitle {
+  min-height: 64rpx;
+  margin-top: 10rpx;
+  color: #73777f;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.card-footer {
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.cost {
+  font-size: 20rpx;
+  font-weight: 650;
+}
+
+.cost-number {
+  color: #e63b32;
+  font-size: 28rpx;
+}
+
+.duration {
+  flex: 1;
+  color: #8a8d93;
+  font-size: 19rpx;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  color: #fff;
+  background: #151719;
+  border-radius: 50%;
+  font-size: 26rpx;
+}

@@ -1,0 +1,23 @@
+.wallet-page { padding: 28rpx; }
+.wallet-head { padding: 30rpx; color: #fff; background: #151719; border-radius: 12rpx; }
+.wallet-label { color: #f1b932; font-size: 20rpx; font-weight: 750; }
+.wallet-balance { margin-top: 10rpx; font-size: 60rpx; font-weight: 800; }
+.wallet-note { margin-top: 8rpx; color: #aeb2b6; font-size: 19rpx; line-height: 1.5; }
+.payment-state { display: flex; align-items: flex-start; gap: 16rpx; margin-top: 18rpx; padding: 20rpx 22rpx; border-radius: 10rpx; }
+.payment-state.ready { color: #0e5d42; background: #e8f7f0; }
+.payment-state.pending { color: #735514; background: #fff3cf; }
+.state-dot { flex: 0 0 auto; width: 14rpx; height: 14rpx; margin-top: 8rpx; background: currentColor; border-radius: 50%; }
+.state-title { font-size: 22rpx; font-weight: 750; }
+.state-note { margin-top: 5rpx; font-size: 18rpx; line-height: 1.5; opacity: .8; }
+.package-title { margin: 34rpx 0 18rpx; font-size: 30rpx; font-weight: 800; }
+.package-list { display: flex; flex-direction: column; gap: 14rpx; }
+.package { display: flex; align-items: center; justify-content: space-between; padding: 25rpx; background: #fff; border: 2rpx solid #e1e3e6; border-radius: 12rpx; }
+.package.selected { border-color: #e63b32; box-shadow: inset 8rpx 0 0 #e63b32; }
+.package-name { font-size: 26rpx; font-weight: 750; }
+.recommended { margin-left: 8rpx; padding: 4rpx 9rpx; color: #8d211d; background: #ffe9e7; border-radius: 5rpx; font-size: 17rpx; }
+.package-note { margin-top: 7rpx; color: #7d8188; font-size: 19rpx; }
+.package-numbers { text-align: right; font-size: 25rpx; font-weight: 750; }
+.price { margin-top: 5rpx; color: #e63b32; font-size: 21rpx; }
+.price-note { margin-top: 22rpx; color: #7d8188; font-size: 20rpx; line-height: 1.55; }
+.buy-button { position: fixed; right: 28rpx; bottom: calc(28rpx + env(safe-area-inset-bottom)); left: 28rpx; height: 88rpx; color: #fff; background: #e63b32; line-height: 88rpx; box-shadow: 0 8rpx 24rpx rgba(230,59,50,.25); }
+.buy-button.disabled { color: #8a8e93; background: #dfe2e5; box-shadow: none; }

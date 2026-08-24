@@ -1,0 +1,42 @@
+<view class="login-page">
+  <view class="login-brand">IP</view>
+  <view class="login-title">登录超级IP创造营</view>
+  <view class="login-copy">登录后即可保存作品与创作点；新用户首次注册获得 500 创作点。</view>
+
+  <view class="form-card" wx:if="{{!loading}}">
+    <view class="privacy-consent-row">
+      <checkbox-group bindchange="onPrivacyChange">
+        <label class="privacy-checkbox-label">
+          <checkbox value="agreed" checked="{{termsChecked}}" color="#07C160" />
+          <text>我已阅读并同意</text>
+        </label>
+      </checkbox-group>
+      <view class="privacy-link-row">
+        <text class="privacy-link" catchtap="openAgreement">《用户服务协议》</text>
+        <text>和</text>
+        <text class="privacy-link" catchtap="openPrivacy">《隐私保护指引》</text>
+      </view>
+    </view>
+
+    <button class="avatar-button" disabled="{{!privacyAgreed || submitting}}" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{avatarUrl}}" class="avatar" src="{{avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar-placeholder">+</view>
+    </button>
+    <view class="avatar-note">可选：同意协议后设置头像</view>
+    <input class="nickname-input" disabled="{{!privacyAgreed || submitting}}" type="nickname" maxlength="20" placeholder="昵称可选，默认“微信用户”" value="{{nickname}}" bindinput="onNicknameInput" />
+    <button class="register-button" loading="{{submitting}}" disabled="{{submitting || !privacyAgreed}}" bindtap="register">微信登录</button>
+    <view class="legal-copy">协议默认不勾选；仅在你主动同意后才会读取云端账户状态、上传头像或处理登录信息。</view>
+  </view>
+  <view class="loading-copy" wx:else>正在确认页面状态…</view>
+
+  <view wx:if="{{showPrivacyDialog}}" class="privacy-mask">
+    <view class="privacy-dialog">
+      <view class="privacy-dialog-title">用户隐私保护提示</view>
+      <view class="privacy-dialog-copy">继续前，请阅读并同意<text class="privacy-link" catchtap="openPrivacy">{{privacyContractName}}</text>。不同意不会触发登录或素材上传。</view>
+      <view class="privacy-dialog-actions">
+        <button class="privacy-cancel" bindtap="handlePrivacyDisagree">不同意</button>
+        <button id="agree-btn" class="privacy-confirm" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">同意并继续</button>
+      </view>
+    </view>
+  </view>
+</view>

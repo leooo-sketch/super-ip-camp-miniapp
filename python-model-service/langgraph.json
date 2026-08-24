@@ -1,0 +1,15 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "dependencies": ["."],
+  "graphs": {
+    "ipcamp_model_service": "./app/graph.py:graph"
+  },
+  "http": {
+    "app": "./app/main.py:app",
+    "enable_custom_route_auth": false,
+    "logging_headers": {
+      "excludes": ["authorization", "x-api-key", "x-internal-token"]
+    }
+  },
+  "env": ".env"
+}

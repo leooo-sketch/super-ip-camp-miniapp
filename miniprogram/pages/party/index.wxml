@@ -1,0 +1,34 @@
+<view class="party-page" wx:if="{{stage === 'choose'}}">
+  <view class="party-title">聚会不冷场</view>
+  <view class="party-note">每个游戏都会先创建微信好友房间，不再点开就直接出题。</view>
+  <view class="game-grid">
+    <view class="party-card" wx:for="{{games}}" wx:key="id" data-id="{{item.id}}" bindtap="createRoom">
+      <view class="party-icon">{{item.icon}}</view><view class="party-name">{{item.title}}</view><view class="party-desc">{{item.note}}</view><view class="create-copy">创建房间 →</view>
+    </view>
+  </view>
+</view>
+
+<view class="lobby-page" wx:elif="{{stage === 'lobby'}}">
+  <view class="lobby-kicker">{{gameTitle}} · 好友房间</view><view class="room-code">{{roomId}}</view>
+  <view class="lobby-note">已加入 {{players.length}} 人 · 邀请朋友后由房主开始</view>
+  <view class="player-list"><view class="player-row" wx:for="{{players}}" wx:key="id"><view class="player-dot">友</view><view class="player-name">{{item.nickname}}</view><view class="ready">已准备</view></view></view>
+  <button class="primary-button" open-type="share">邀请微信好友</button>
+  <button class="secondary-button" wx:if="{{isOwner}}" bindtap="startRoom">开始 {{gameTitle}}</button><view class="waiting-copy" wx:else>等待房主开始…</view>
+  <view class="back-link" bindtap="backToGames">返回游戏列表</view>
+</view>
+
+<view class="play-page" wx:elif="{{stage === 'playing'}}">
+  <view class="play-head"><view><view class="play-kicker">第 {{party.round + 1}} 轮</view><view class="play-title">{{gameTitle}}</view></view><button class="mini-share" open-type="share">继续邀请</button></view>
+  <scroll-view class="player-chips" scroll-x><view class="chip {{item.id === party.activePlayerId ? 'active-chip' : ''}}" wx:for="{{players}}" wx:key="id">{{item.nickname}}</view></scroll-view>
+  <view class="round-card">
+    <view class="turn-name" wx:if="{{party.activeNickname}}">本轮：{{party.activeNickname}}</view>
+    <view class="round-prompt">{{party.prompt}}</view>
+    <view class="secret-card" wx:if="{{secret}}"><view class="secret-label">只有你能看到</view><view class="secret-word">{{secret}}</view><view class="secret-note">不要把屏幕内容直接给其他玩家看</view></view>
+    <view class="range" wx:if="{{room.gameId === 'bomb'}}">当前范围：{{party.rangeMin}} — {{party.rangeMax}}</view>
+    <view class="guess-row" wx:if="{{room.gameId === 'bomb' && !party.exploded}}"><input class="guess-input" type="number" value="{{guess}}" bindinput="onGuessInput" placeholder="输入数字"/><button bindtap="submitGuess">提交</button></view>
+  </view>
+  <button class="primary-button" wx:if="{{isOwner}}" bindtap="nextRound">下一轮</button><view class="waiting-copy" wx:else>内容会随房主操作自动同步</view>
+  <button class="secondary-button" open-type="share">把房间发给朋友</button>
+</view>
+
+<view class="loading-page" wx:else>正在进入聚会房间…</view>

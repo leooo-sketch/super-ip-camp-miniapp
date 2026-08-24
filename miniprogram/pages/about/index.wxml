@@ -1,0 +1,40 @@
+<view class="about-page">
+  <view class="about-title">超级IP创造营</view>
+  <view class="about-meta">协议、隐私与AI服务说明</view>
+
+  <view class="section">
+    <view class="section-title">协议入口</view>
+    <view class="section-copy">你可以随时查看完整协议。首次登录时协议默认不勾选，只有在你主动选择同意后才会继续登录、读取云端账户状态或上传个人素材。</view>
+    <view class="policy-links">
+      <button class="policy-button" bindtap="openAgreement">查看《用户服务协议》</button>
+      <button class="policy-button" bindtap="openPrivacy">查看《隐私保护指引》</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">服务范围</view>
+    <view class="section-copy">本工具用于处理用户本人原创或已取得明确授权的图片与视频，生成个人IP短视频。不得上传未授权人物、音乐、影视片段或用于冒充他人、欺诈和规避平台审核。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">信息处理</view>
+    <view class="section-copy">在你主动同意协议并使用相关功能后，为完成登录与创作，我们可能处理微信账号标识、你主动授权的手机号尾号与不可逆摘要、昵称头像、照片、视频、创作描述、任务状态和账户创作点。素材存储于当前小程序云环境，并可能发送给已接入的视频生成服务商完成任务。密钥仅保存在服务端。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">AI 内容标识</view>
+    <view class="section-copy">生成结果属于 AI 生成或 AI 辅助创作内容。发布前应按照发布平台规则添加相应标识，并再次确认人物肖像、音乐、商品素材和参考视频的使用权。</view>
+    <view class="model-info">服务商：{{aiProviderName}} · 模型：{{aiModelName}} · 登记/备案号：{{aiRegistrationNumber || '待配置'}}</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">数据权利</view>
+    <view class="section-copy">你可以在“我的”页面注销账号。注销后将删除账户、任务记录、创作点流水和系统能够定位的已上传素材。依法必须保留的安全或交易记录除外。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">投诉与联系</view>
+    <view class="section-copy">如需咨询、侵权投诉、申请更正或删除个人信息，请通过小程序客服提交问题和相关证明。</view>
+    <button class="contact-button" open-type="contact">联系小程序客服</button>
+  </view>
+</view>

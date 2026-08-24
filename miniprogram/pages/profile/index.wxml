@@ -1,0 +1,93 @@
+<view class="profile-page">
+  <view wx:if="{{loading}}" class="loading-card">正在确认登录状态…</view>
+
+  <block wx:elif="{{!registered}}">
+    <view class="guest-head">
+      <view class="guest-brand">IP</view>
+      <view class="guest-title">登录超级IP创造营</view>
+      <view class="guest-copy">登录后同步创作点、作品和好友房间。新用户首次注册赠送 500 创作点。</view>
+    </view>
+
+    <view class="login-card">
+      <view class="privacy-consent-row">
+        <checkbox-group bindchange="onPrivacyChange">
+          <label class="privacy-checkbox-label">
+            <checkbox value="agreed" checked="{{termsChecked}}" color="#07C160" />
+            <text>我已阅读并同意</text>
+          </label>
+        </checkbox-group>
+        <view class="privacy-link-row">
+          <text class="privacy-link" catchtap="openAgreement">《用户服务协议》</text>
+          <text>和</text>
+          <text class="privacy-link" catchtap="openPrivacy">《隐私保护指引》</text>
+        </view>
+      </view>
+
+      <view class="profile-input-row {{privacyAgreed ? '' : 'input-disabled'}}">
+        <button class="avatar-button" disabled="{{!privacyAgreed || submitting}}" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image wx:if="{{avatarUrl}}" class="login-avatar" src="{{avatarUrl}}" mode="aspectFill"></image>
+          <view wx:else class="login-avatar login-avatar-placeholder">+</view>
+        </button>
+        <view class="profile-input-body">
+          <view class="input-label">头像与昵称（可选，同意协议后可设置）</view>
+          <input class="nickname-input" disabled="{{!privacyAgreed || submitting}}" type="nickname" maxlength="20" placeholder="微信用户" value="{{nickname}}" bindinput="onNicknameInput" />
+        </view>
+      </view>
+      <button class="login-button wechat-button" loading="{{submitting}}" disabled="{{submitting || !privacyAgreed}}" bindtap="wechatLogin">微信登录</button>
+      <button class="login-button phone-button" open-type="getPhoneNumber" loading="{{submitting}}" disabled="{{submitting || !privacyAgreed}}" bindgetphonenumber="phoneLogin">手机号授权登录</button>
+      <view class="login-legal">协议默认不勾选。手机号仅在你主动点击“手机号授权登录”并授权后用于绑定账号，不会公开展示。</view>
+    </view>
+
+    <view class="guest-benefits">
+      <view class="benefit"><text>01</text><view><view>保存创作资产</view><view class="benefit-note">作品、任务与创作点跨设备同步</view></view></view>
+      <view class="benefit"><text>02</text><view><view>邀请微信好友</view><view class="benefit-note">创建对战房间与聚会游戏</view></view></view>
+      <view class="benefit"><text>03</text><view><view>账户安全可控</view><view class="benefit-note">支持注销账号与删除数据</view></view></view>
+    </view>
+    <view class="guest-about" bindtap="openAbout">查看协议与隐私说明 ›</view>
+  </block>
+
+  <block wx:else>
+    <view class="identity">
+      <image wx:if="{{profile.avatarUrl}}" class="avatar" src="{{profile.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar">IP</view>
+      <view>
+        <view class="nickname">{{profile.nickname || '微信用户'}}</view>
+        <view class="plan">{{profile.plan || '基础版'}} · {{loginMethodText}}</view>
+      </view>
+    </view>
+
+    <view class="balance-panel" bindtap="openWallet">
+      <view class="balance-top"><view class="balance-label">可用创作点</view><view class="balance-link">充值 ›</view></view>
+      <view class="balance-value">{{balanceText}}</view>
+      <view class="balance-note">用于本人或已获授权素材的创作任务</view>
+    </view>
+
+    <view class="menu-panel">
+      <view class="menu-row" bindtap="openWorks"><view><view class="menu-title">我的作品</view><view class="menu-note">生成任务与成片记录</view></view><text>›</text></view>
+      <view class="menu-row" bindtap="openWallet"><view><view class="menu-title">充值创作点</view><view class="menu-note">购买创作服务包，支付结果由服务端确认</view></view><text>›</text></view>
+      <view class="menu-row" bindtap="openAbout"><view><view class="menu-title">协议与隐私</view><view class="menu-note">用户协议、隐私说明与投诉渠道</view></view><text>›</text></view>
+      <view class="menu-row danger-row" bindtap="requestDeleteAccount"><view><view class="menu-title">注销账号</view><view class="menu-note">删除账户、任务记录与已上传素材</view></view><text>›</text></view>
+    </view>
+
+    <view class="mind-break" bindtap="openGames">
+      <view><view class="mind-kicker">偶尔换个脑筋</view><view class="mind-title">益智游戏</view></view>
+      <view class="mind-link">邀请好友玩 ›</view>
+    </view>
+
+    <view class="policy-panel">
+      <view class="policy-title">创作边界</view>
+      <view class="policy-copy">仅上传本人原创或明确授权素材。不得用于冒充他人、欺诈或侵犯肖像与版权。</view>
+    </view>
+  </block>
+
+  <view wx:if="{{showPrivacyDialog}}" class="privacy-mask">
+    <view class="privacy-dialog">
+      <view class="privacy-dialog-title">用户隐私保护提示</view>
+      <view class="privacy-dialog-copy">你已勾选同意用户协议。继续前，请阅读并同意<text class="privacy-link" catchtap="openPrivacy">{{privacyContractName}}</text>。不同意不会触发登录、上传头像、手机号授权或云端账户读取。</view>
+      <view class="privacy-dialog-actions">
+        <button class="privacy-cancel" bindtap="handlePrivacyDisagree">不同意</button>
+        <button id="agree-btn" class="privacy-confirm" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">同意并继续</button>
+      </view>
+    </view>
+  </view>
+</view>

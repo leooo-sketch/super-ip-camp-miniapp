@@ -1,0 +1,16 @@
+<view class="workflow-card accent-{{workflow.accent}} {{workflow.enabled ? '' : 'is-disabled'}}" bindtap="handleTap">
+  <view class="card-topline">
+    <text class="category">{{workflow.category}}</text>
+    <text class="badge">{{workflow.enabled ? workflow.badge : '即将开放'}}</text>
+  </view>
+  <view class="card-title">{{workflow.title}}</view>
+  <view class="card-subtitle">{{workflow.subtitle}}</view>
+  <view class="card-footer">
+    <view class="cost">
+      <text class="cost-number">{{workflow.tokenCost}}</text>
+      <text> 创作点</text>
+    </view>
+    <view class="duration">{{workflow.duration}}</view>
+    <view class="arrow">→</view>
+  </view>
+</view>

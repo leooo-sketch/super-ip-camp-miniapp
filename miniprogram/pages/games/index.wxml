@@ -1,0 +1,17 @@
+<view class="games-page">
+  <view class="eyebrow">BRAIN BREAK</view>
+  <view class="title">换个脑筋，再继续创作</view>
+  <view class="subtitle">这里是账户里的隐藏休息区，不打扰主创作流程。</view>
+
+  <view class="game-card quiz-card" bindtap="openQuiz">
+    <view class="game-mark">知</view>
+    <view class="game-copy"><view class="game-title">王者对决</view><view class="game-note">微信好友房间 · 随机 8 题 · 满分 1000</view></view>
+    <text class="arrow">›</text>
+  </view>
+  <view class="game-card" bindtap="openParty">
+    <view class="game-mark party-mark">聚</view>
+    <view class="game-copy"><view class="game-title">聚会小游戏</view><view class="game-note">5 个轻松小游戏 · 多人房间同步</view></view>
+    <text class="arrow">›</text>
+  </view>
+  <button class="share-button" open-type="share">邀请朋友一起玩</button>
+</view>

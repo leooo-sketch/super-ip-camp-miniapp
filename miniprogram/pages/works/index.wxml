@@ -1,0 +1,39 @@
+<view class="works-page">
+  <view class="works-head">
+    <view><view class="works-title">我的作品</view><view class="works-note">生成任务与原创成片资产</view></view>
+    <button class="new-button" bindtap="startCreating">＋ 新建</button>
+  </view>
+  <view wx:if="{{!loading && !registered}}" class="empty-state panel">
+    <view class="empty-title">登录后查看作品</view>
+    <view class="empty-note">作品、生成任务和创作点会安全保存在你的微信账号中。</view>
+    <button class="empty-button" bindtap="openLogin">去“我的”登录</button>
+  </view>
+  <block wx:else>
+  <scroll-view class="filters" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="filter-row">
+      <view wx:for="{{filters}}" wx:key="id" class="filter {{activeFilter === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectFilter">{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="empty-state">正在读取作品...</view>
+  <view wx:elif="{{!visibleTasks.length}}" class="empty-state panel">
+    <view class="empty-title">还没有相关作品</view>
+    <view class="empty-note">从创作工作台提交第一个本人原创视频任务。</view>
+    <button class="empty-button" bindtap="startCreating">去创作</button>
+  </view>
+  <view wx:else class="task-list">
+    <view wx:for="{{visibleTasks}}" wx:key="id" class="task-card" data-id="{{item.id}}" bindtap="openTask">
+      <view class="task-cover-shell">
+        <image class="task-cover" src="{{item.coverUrl || '/assets/creator-studio-open-source.jpg'}}" mode="aspectFill"></image>
+        <view wx:if="{{item.status === 'succeeded' && !item.demoMode}}" class="task-ai-label">AI生成</view>
+      </view>
+      <view class="task-body">
+        <view class="task-top"><text class="status status-{{item.status}}">{{item.statusText}}</text><text class="time">{{item.createdAtText}}</text></view>
+        <view class="task-name">{{item.workflowTitle}}</view>
+        <view class="task-topic">{{item.topic}}</view>
+        <view class="task-foot"><text>{{item.progress}}%</text><text>{{item.tokenCost}} 创作点 〉</text></view>
+      </view>
+    </view>
+  </view>
+  </block>
+</view>

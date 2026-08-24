@@ -74,4 +74,3 @@ python-model-service/langgraph.json
 ## License
 
 [MIT](LICENSE)
-

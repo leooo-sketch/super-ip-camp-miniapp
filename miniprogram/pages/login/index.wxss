@@ -1,0 +1,26 @@
+.login-page { min-height: 100vh; box-sizing: border-box; padding: 120rpx 46rpx 60rpx; background: #f4f5f7; }
+.login-brand { display: flex; align-items: center; justify-content: center; width: 108rpx; height: 108rpx; color: #fff; background: #111; border-radius: 24rpx; font-size: 44rpx; font-weight: 900; }
+.login-title { margin-top: 44rpx; font-size: 48rpx; font-weight: 850; letter-spacing: -2rpx; }
+.login-copy { margin-top: 20rpx; color: #686d73; font-size: 25rpx; line-height: 1.75; }
+.form-card { margin-top: 58rpx; padding: 42rpx 34rpx; background: #fff; border-radius: 20rpx; }
+.avatar-button { width: 128rpx; height: 128rpx; margin: 0 auto; padding: 0; background: transparent; border-radius: 50%; }
+.avatar-button::after { border: 0; }
+.avatar, .avatar-placeholder { width: 128rpx; height: 128rpx; border-radius: 50%; }
+.avatar-placeholder { display: flex; align-items: center; justify-content: center; color: #147d78; background: #e4f4f2; font-size: 54rpx; }
+.avatar-note { margin-top: 14rpx; color: #92969b; font-size: 20rpx; text-align: center; }
+.nickname-input { height: 96rpx; margin-top: 34rpx; padding: 0 26rpx; background: #f4f5f7; border-radius: 12rpx; font-size: 27rpx; }
+.register-button { height: 96rpx; margin-top: 24rpx; color: #fff; background: #111; border-radius: 12rpx; font-size: 28rpx; font-weight: 750; line-height: 96rpx; }
+.legal-copy, .loading-copy { margin-top: 26rpx; color: #999da2; font-size: 19rpx; line-height: 1.65; text-align: center; }
+.privacy-consent-row { margin-bottom: 28rpx; padding: 22rpx; background: #f7f8fa; border-radius: 12rpx; }
+.privacy-checkbox-label { display: flex; align-items: center; gap: 10rpx; color: #34383c; font-size: 22rpx; }
+.privacy-link-row { margin-top: 10rpx; padding-left: 54rpx; color: #757a80; font-size: 20rpx; line-height: 1.6; }
+.privacy-link { color: #147d78; font-weight: 650; }
+.privacy-mask { position: fixed; z-index: 9999; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; padding: 48rpx; background: rgba(0,0,0,.48); box-sizing: border-box; }
+.privacy-dialog { width: 100%; max-width: 620rpx; padding: 38rpx 34rpx 30rpx; background: #fff; border-radius: 20rpx; box-sizing: border-box; }
+.privacy-dialog-title { color: #151719; font-size: 32rpx; font-weight: 800; text-align: center; }
+.privacy-dialog-copy { margin-top: 24rpx; color: #62676d; font-size: 23rpx; line-height: 1.75; }
+.privacy-dialog-actions { display: flex; gap: 18rpx; margin-top: 34rpx; }
+.privacy-cancel, .privacy-confirm { flex: 1; height: 82rpx; margin: 0; border-radius: 10rpx; font-size: 24rpx; line-height: 82rpx; }
+.privacy-cancel { color: #4f5459; background: #f2f3f5; }
+.privacy-confirm { color: #fff; background: #07c160; }
+.privacy-cancel::after, .privacy-confirm::after { border: 0; }

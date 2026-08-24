@@ -1,0 +1,12 @@
+{
+  "name": "super-ip-camp-miniapp",
+  "version": "0.4.2",
+  "private": true,
+  "description": "超级IP创造营 - AI个人IP视频创作微信小程序",
+  "scripts": {
+    "check": "node scripts/validate-project.js",
+    "release-check": "node scripts/release-check.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": { "node": ">=18" }
+}

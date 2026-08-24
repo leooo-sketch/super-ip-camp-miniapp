@@ -1,0 +1,46 @@
+<view class="quiz-home" wx:if="{{stage === 'home'}}">
+  <view class="home-kicker">WECHAT DUEL</view>
+  <view class="home-title">知识要和朋友较量，才更有意思</view>
+  <view class="home-note">每局随机 8 题、每题 30 秒，其中 2 题双倍，总分 1000 分。</view>
+  <button class="primary-button" bindtap="createFriendRoom">创建好友对战房间</button>
+  <button class="secondary-button" bindtap="startPractice">先进行单人练习</button>
+  <view class="home-tip">创建后点击“邀请微信好友”，好友加入后由房主开始。</view>
+</view>
+
+<view class="lobby-page" wx:elif="{{stage === 'lobby'}}">
+  <view class="lobby-kicker">好友对战房间</view>
+  <view class="room-code">{{roomId}}</view>
+  <view class="lobby-note">已加入 {{players.length}} 人 · 至少 2 人即可开始</view>
+  <view class="player-list">
+    <view class="player-row" wx:for="{{players}}" wx:key="id">
+      <view class="player-avatar">友</view><view class="player-name">{{item.nickname}}</view><view class="ready">已准备</view>
+    </view>
+  </view>
+  <button class="primary-button" open-type="share">邀请微信好友</button>
+  <button class="secondary-button" wx:if="{{isOwner}}" bindtap="startRoom">开始对战</button>
+  <view class="waiting-copy" wx:else>等待房主开始…</view>
+</view>
+
+<view class="quiz-page" wx:elif="{{stage === 'playing'}}">
+  <view class="topline"><text>第 {{current + 1}} / 8 题</text><text>{{score}} / 1000</text></view>
+  <view class="progress"><view class="progress-fill" style="width: {{(current + 1) * 12.5}}%"></view></view>
+  <view class="duel">
+    <view><text class="duel-label">你</text><text class="duel-score">{{score}}</text></view><view class="vs">{{mode === 'room' ? 'VS' : '练习'}}</view><view><text class="duel-label">{{opponentName}}</text><text class="duel-score">{{opponentScore}}</text></view>
+  </view>
+  <view class="question-card">
+    <view class="question-meta"><text class="tag">{{question.tag}}</text><text class="timer">{{seconds}} 秒</text><text class="double" wx:if="{{question.double}}">×2 双倍题</text></view>
+    <view class="question">{{question.q}}</view>
+    <view class="answers">
+      <view wx:for="{{question.a}}" wx:key="index" data-index="{{index}}" bindtap="answer" class="answer {{answered && index === correctIndex ? 'right' : ''}} {{answered && index === selected && index !== correctIndex ? 'wrong' : ''}}"><text class="letter">{{letters[index]}}</text><text>{{item}}</text></view>
+    </view>
+  </view>
+</view>
+
+<view class="result-page" wx:elif="{{stage === 'result'}}">
+  <view class="result-kicker">本局结束</view><view class="result-title">{{mode === 'room' && score >= opponentScore ? '漂亮的好友对决！' : '这一局也涨知识了'}}</view>
+  <view class="final-score">{{score}}<text> / 1000</text></view>
+  <view class="result-note">答对 {{correctCount}} 道<text wx:if="{{mode === 'room'}}"> · {{opponentName}} {{opponentScore}} 分</text></view>
+  <button class="primary-button" bindtap="backHome">重新选择玩法</button><button class="share-result" wx:if="{{mode === 'room'}}" open-type="share">把本局发给朋友</button>
+</view>
+
+<view class="loading-page" wx:else>正在进入知识对决…</view>

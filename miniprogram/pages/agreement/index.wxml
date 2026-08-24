@@ -1,0 +1,44 @@
+<view class="agreement-page">
+  <view class="agreement-title">超级IP创造营用户服务协议</view>
+  <view class="agreement-date">更新日期：2026年8月24日</view>
+
+  <view class="section">
+    <view class="section-title">1. 服务说明</view>
+    <view class="section-copy">超级IP创造营提供AI辅助的图片、视频创作及相关账户、作品管理功能。部分功能依赖第三方AI模型、微信能力和腾讯云服务，实际可用能力以页面展示为准。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">2. 账户与登录</view>
+    <view class="section-copy">你可以使用微信账号登录；如主动选择手机号授权登录，我们仅在授权后处理相应手机号信息。昵称和头像为可选信息。请妥善使用自己的微信账号，不得冒用他人身份。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">3. 素材与权利</view>
+    <view class="section-copy">你应仅上传本人原创、本人肖像或已取得充分授权的图片、视频、音乐及其他素材。不得上传侵犯他人肖像权、隐私权、著作权、商标权或其他合法权益的内容。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">4. AI生成内容</view>
+    <view class="section-copy">AI生成结果可能存在不准确、不完整或与预期不一致的情况。你应在发布前自行检查生成结果，并按照相关法律法规和发布平台规则标注“AI生成”或“AI辅助创作”等必要标识。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">5. 禁止用途</view>
+    <view class="section-copy">不得利用本服务从事违法违规活动，不得用于冒充他人、诈骗、造谣、侵犯隐私、生成违法有害内容、规避平台审核，或实施其他损害他人合法权益的行为。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">6. 创作点与付费</view>
+    <view class="section-copy">如页面提供创作点或付费服务，具体价格、数量和使用规则以购买页面显示为准。支付能力未完成配置时不会产生实际扣款。退款、异常订单等按页面规则及适用法律处理。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">7. 账号注销</view>
+    <view class="section-copy">你可以在“我的”页面申请注销账号并删除系统能够定位的账户数据和已上传素材。依法需要保留的安全、交易或争议处理记录可能在法定期限内继续保存。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">8. 服务变更与联系</view>
+    <view class="section-copy">为改进产品或满足合规要求，我们可能更新功能和本协议。涉及重要变化时会通过页面提示等合理方式告知。如有问题，可通过小程序客服联系我们。</view>
+  </view>
+</view>

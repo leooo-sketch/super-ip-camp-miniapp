@@ -1,0 +1,29 @@
+<view class="wallet-page">
+  <view class="wallet-head">
+    <view class="wallet-label">当前创作点</view>
+    <view class="wallet-balance">{{balanceText}}</view>
+    <view class="wallet-note">创作点用于购买小程序内的 AI 视频创作服务</view>
+  </view>
+
+  <view class="payment-state {{paymentConfigured ? 'ready' : 'pending'}}">
+    <view class="state-dot"></view>
+    <view>
+      <view class="state-title">{{checking ? '正在检查支付状态' : (paymentConfigured ? '微信支付已连接' : '微信支付商户配置中')}}</view>
+      <view class="state-note">{{paymentConfigured ? '支付成功后由微信回调服务端确认并发放创作点' : '配置完成前不可付款，不会发生扣款'}}</view>
+    </view>
+  </view>
+
+  <view class="package-title">选择创作服务包</view>
+  <view class="package-list">
+    <view wx:for="{{packages}}" wx:key="id" class="package {{selectedId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPackage">
+      <view>
+        <view class="package-name">{{item.name}} <text wx:if="{{item.recommended}}" class="recommended">常用</text></view>
+        <view class="package-note">{{item.note}}</view>
+      </view>
+      <view class="package-numbers"><view>{{item.points}} 创作点</view><view class="price">¥{{item.price}}</view></view>
+    </view>
+  </view>
+
+  <view class="price-note">支付前请确认服务包与价格。支付结果以微信支付服务端回调为准；生成失败时按任务规则退回创作点。</view>
+  <button class="buy-button {{paymentConfigured ? '' : 'disabled'}}" loading="{{paying}}" disabled="{{paying || checking}}" bindtap="buy">{{paymentConfigured ? '微信支付充值' : '支付配置中'}}</button>
+</view>

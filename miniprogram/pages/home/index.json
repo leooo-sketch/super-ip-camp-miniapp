@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "超级IP创造营",
+  "usingComponents": {
+    "workflow-card": "/components/workflow-card/index"
+  }
+}

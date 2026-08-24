@@ -1,0 +1,60 @@
+<view class="page-shell home-page">
+  <view class="topbar">
+    <view>
+      <view class="brand-line">超级IP创造营</view>
+      <view class="brand-note">个人IP视频生产工作台</view>
+    </view>
+    <view class="wallet">
+      <text class="wallet-label">{{registered ? '创作点' : '账户'}}</text>
+      <text class="wallet-value">{{balanceText}}</text>
+    </view>
+  </view>
+
+  <view class="hero">
+    <image class="hero-image" src="/assets/creator-studio-open-source.jpg" mode="aspectFill"></image>
+    <view class="hero-shade"></view>
+    <view class="hero-content">
+      <view class="hero-kicker">AI VIDEO OPERATING SYSTEM</view>
+      <view class="hero-title">让你的脸、观点和风格，形成稳定内容资产</view>
+      <view class="hero-meta">本人素材 · 原创重构 · 多模型路由</view>
+    </view>
+  </view>
+
+  <view class="quick-grid">
+    <view class="quick-action quick-red" data-id="viral-film" bindtap="handleWorkflowSelect">
+      <view class="quick-index">01</view>
+      <view class="quick-title">一键成片</view>
+      <view class="quick-note">从主题到15秒成片</view>
+      <view class="quick-arrow">→</view>
+    </view>
+    <view class="quick-action quick-dark" data-id="same-style" bindtap="handleWorkflowSelect">
+      <view class="quick-index">02</view>
+      <view class="quick-title">同款重构 · 适配中</view>
+      <view class="quick-note">模型接口完成适配后开放</view>
+      <view class="quick-arrow">→</view>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <view class="section-title">创作工作流</view>
+    <view class="section-note">按结果选择，不用学模型参数</view>
+  </view>
+
+  <view class="workflow-grid">
+    <workflow-card
+      wx:for="{{workflows}}"
+      wx:key="id"
+      workflow="{{item}}"
+      bind:select="handleWorkflowSelect"
+    />
+  </view>
+
+  <view class="principle panel">
+    <view class="principle-mark">原创优先</view>
+    <view class="principle-body">
+      <view class="principle-title">建立可长期经营的个人IP</view>
+      <view class="principle-copy">仅使用本人原创或明确授权素材，发布时标注 AI 生成/AI 辅助创作。</view>
+    </view>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

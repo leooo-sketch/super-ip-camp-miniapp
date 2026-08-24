@@ -1,0 +1,13 @@
+.games-page { padding: 46rpx 30rpx; }
+.eyebrow { color: #147d78; font-size: 19rpx; font-weight: 700; letter-spacing: 4rpx; }
+.title { margin-top: 14rpx; font-size: 44rpx; font-weight: 800; }
+.subtitle { margin-top: 14rpx; color: #777a80; font-size: 23rpx; line-height: 1.65; }
+.game-card { display: flex; align-items: center; margin-top: 24rpx; padding: 30rpx; background: #fff; border: 1rpx solid #e4e6ea; border-radius: 14rpx; }
+.quiz-card { margin-top: 44rpx; border-left: 7rpx solid #f1b932; }
+.game-mark { display: flex; align-items: center; justify-content: center; width: 74rpx; height: 74rpx; color: #151719; background: #f1b932; border-radius: 10rpx; font-size: 30rpx; font-weight: 800; }
+.party-mark { color: #fff; background: #147d78; }
+.game-copy { flex: 1; margin-left: 22rpx; }
+.game-title { font-size: 29rpx; font-weight: 750; }
+.game-note { margin-top: 7rpx; color: #81858b; font-size: 20rpx; }
+.arrow { color: #9ba0a5; font-size: 42rpx; }
+.share-button { margin-top: 34rpx; color: #555a60; background: transparent; font-size: 22rpx; }

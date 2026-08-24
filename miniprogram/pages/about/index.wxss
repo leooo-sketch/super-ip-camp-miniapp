@@ -1,0 +1,11 @@
+.about-page { padding: 34rpx 30rpx 64rpx; }
+.about-title { font-size: 40rpx; font-weight: 800; }
+.about-meta { margin-top: 8rpx; color: #73777f; font-size: 22rpx; }
+.section { padding: 30rpx 0; border-bottom: 1rpx solid #e4e6ea; }
+.section-title { font-size: 28rpx; font-weight: 750; }
+.section-copy { margin-top: 12rpx; color: #555a62; font-size: 24rpx; line-height: 1.75; }
+.model-info { margin-top: 16rpx; padding: 18rpx; color: #5d450c; background: #fff1c7; border-radius: 8rpx; font-size: 21rpx; line-height: 1.6; }
+.contact-button { margin-top: 20rpx; height: 78rpx; color: #fff; background: #147d78; line-height: 78rpx; }
+.policy-links { display: flex; gap: 14rpx; margin-top: 20rpx; }
+.policy-button { flex: 1; margin: 0; padding: 0 16rpx; color: #147d78; background: #eef8f7; border-radius: 10rpx; font-size: 21rpx; }
+.policy-button::after { border: 0; }

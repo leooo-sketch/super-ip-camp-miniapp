@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "your-cloudbase-env-id",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "ipcamp-api",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "timeout": 120,
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "ipcamp-worker",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "timeout": 60,
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
+      "name": "ipcamp-pay-callback",
+      "runtime": "Nodejs16.13",
+      "handler": "index.main",
+      "timeout": 30,
+      "memorySize": 256,
+      "installDependency": true
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+app:
+  description: 超级IP创造营统一 AI 路由。接收 CloudBase 请求，通过 HTTP 调用 Python 模型服务，并返回标准化异步任务状态。
+  icon: 🎬
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 超级IP创造营-AI路由
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: Python 模型服务 HTTPS 根地址，不含末尾斜杠
+    id: 4d99ee09-4b68-4a57-a8be-15d68a04e001
+    name: MODEL_SERVICE_BASE_URL
+    selector:
+    - env
+    - MODEL_SERVICE_BASE_URL
+    value: https://model-service.example.com
+    value_type: string
+  - description: Dify 调用 Python 模型服务的内部鉴权令牌
+    id: 4d99ee09-4b68-4a57-a8be-15d68a04e002
+    name: MODEL_SERVICE_TOKEN
+    selector:
+    - env
+    - MODEL_SERVICE_TOKEN
+    value: CHANGE_ME_AFTER_IMPORT
+    value_type: secret
+  features:
+    file_upload:
+      allowed_file_extensions: []
+      allowed_file_types: []
+      allowed_file_upload_methods: []
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start-build_request
+      source: start
+      sourceHandle: source
+      target: build_request
+      targetHandle: target
+      type: custom
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: build_request-call_python_model
+      source: build_request
+      sourceHandle: source
+      target: call_python_model
+      targetHandle: target
+      type: custom
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: call_python_model-end
+      source: call_python_model
+      sourceHandle: source
+      target: end
+      targetHandle: target
+      type: custom
+    nodes:
+    - data:
+        desc: CloudBase 的 DifyProvider 只调用此统一入口；小程序不直接持有 Dify Key。
+        selected: false
+        title: 小程序任务请求
+        type: start
+        variables:
+        - label: 操作
+          max_length: 16
+          options:
+          - create
+          - query
+          required: true
+          type: select
+          variable: operation
+        - label: 业务工作流 ID
+          max_length: 64
+          options: []
+          required: false
+          type: text-input
+          variable: workflow_id
+        - label: Python 模型任务 ID
+          max_length: 256
+          options: []
+          required: false
+          type: text-input
+          variable: provider_task_id
+        - label: CloudBase 业务任务 ID
+          max_length: 128
+          options: []
+          required: false
+          type: text-input
+          variable: client_business_id
+        - label: 导演提示词
+          max_length: 3000
+          options: []
+          required: false
+          type: paragraph
+          variable: director_prompt
+        - label: 图片 URL JSON 数组
+          max_length: 10000
+          options: []
+          required: false
+          type: paragraph
+          variable: images_json
+        - label: 参考视频 URL
+          max_length: 2048
+          options: []
+          required: false
+          type: text-input
+          variable: video_url
+        - label: 画面比例
+          max_length: 8
+          options:
+          - '9:16'
+          - '16:9'
+          - '1:1'
+          required: true
+          type: select
+          variable: aspect_ratio
+        - label: 清晰度
+          max_length: 8
+          options:
+          - 720p
+          - 1080p
+          required: true
+          type: select
+          variable: resolution
+        - label: 时长（秒）
+          max_length: 48
+          options: []
+          required: true
+          type: number
+          variable: duration
+        - label: 是否移除原音
+          max_length: 48
+          options: []
+          required: true
+          type: checkbox
+          variable: remove_audio
+      height: 480
+      id: start
+      position:
+        x: 80
+        y: 240
+      positionAbsolute:
+        x: 80
+        y: 240
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 280
+    - data:
+        code: |-
+          import json
+
+          ALLOWED_WORKFLOWS = {
+              "viral-film",
+              "same-style",
+              "ip-avatar",
+              "fitness-diary",
+              "talking-script",
+          }
+
+          def main(operation: str, workflow_id: str, provider_task_id: str,
+                   client_business_id: str, director_prompt: str,
+                   images_json: str, video_url: str, aspect_ratio: str,
+                   resolution: str, duration: int, remove_audio: bool) -> dict:
+              if operation not in {"create", "query"}:
+                  raise ValueError("operation 必须是 create 或 query")
+              if operation == "create" and workflow_id not in ALLOWED_WORKFLOWS:
+                  raise ValueError("不支持的业务工作流")
+              try:
+                  images = json.loads(images_json or "[]")
+              except json.JSONDecodeError as exc:
+                  raise ValueError("images_json 不是有效 JSON") from exc
+              if not isinstance(images, list):
+                  raise ValueError("images_json 必须是数组")
+              body = {
+                  "operation": operation,
+                  "workflow_id": workflow_id or "",
+                  "provider_task_id": provider_task_id or "",
+                  "client_business_id": client_business_id or "",
+                  "director_prompt": director_prompt or "",
+                  "images": images,
+                  "video_url": video_url or None,
+                  "aspect_ratio": aspect_ratio or "9:16",
+                  "resolution": resolution or "720p",
+                  "duration": int(duration or 10),
+                  "remove_audio": bool(remove_audio),
+              }
+              return {
+                  "request_json": json.dumps(body, ensure_ascii=False),
+                  "route": f"{operation}:{workflow_id or 'task-status'}",
+              }
+        code_language: python3
+        desc: 白名单校验、类型转换和请求契约固定化。业务 workflow_id 会显示在运行日志中。
+        outputs:
+          request_json:
+            children: null
+            type: string
+          route:
+            children: null
+            type: string
+        selected: false
+        title: 业务工作流路由与请求构建
+        type: code
+        variables:
+        - value_selector:
+          - start
+          - operation
+          variable: operation
+        - value_selector:
+          - start
+          - workflow_id
+          variable: workflow_id
+        - value_selector:
+          - start
+          - provider_task_id
+          variable: provider_task_id
+        - value_selector:
+          - start
+          - client_business_id
+          variable: client_business_id
+        - value_selector:
+          - start
+          - director_prompt
+          variable: director_prompt
+        - value_selector:
+          - start
+          - images_json
+          variable: images_json
+        - value_selector:
+          - start
+          - video_url
+          variable: video_url
+        - value_selector:
+          - start
+          - aspect_ratio
+          variable: aspect_ratio
+        - value_selector:
+          - start
+          - resolution
+          variable: resolution
+        - value_selector:
+          - start
+          - duration
+          variable: duration
+        - value_selector:
+          - start
+          - remove_audio
+          variable: remove_audio
+      height: 180
+      id: build_request
+      position:
+        x: 420
+        y: 340
+      positionAbsolute:
+        x: 420
+        y: 340
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 280
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: body-1
+            key: ''
+            type: text
+            value: '{{#build_request.request_json#}}'
+          type: raw-text
+        desc: 调用独立 Python 模型服务。该接口只创建任务或查询状态，不在 HTTP 连接中等待视频生成完成。
+        headers: |-
+          Content-Type:application/json
+          Accept:application/json
+          X-Internal-Token:{{#env.MODEL_SERVICE_TOKEN#}}
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 500
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 10
+          max_read_timeout: 50
+          max_write_timeout: 10
+        title: HTTP 请求 → Python 模型
+        type: http-request
+        url: '{{#env.MODEL_SERVICE_BASE_URL#}}/v1/tasks/dispatch'
+        variables: []
+      height: 190
+      id: call_python_model
+      position:
+        x: 760
+        y: 340
+      positionAbsolute:
+        x: 760
+        y: 340
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 280
+    - data:
+        desc: CloudBase DifyProvider 解析 result_json，并继续复用原 tasks 表和小程序轮询页面。
+        outputs:
+        - value_selector:
+          - call_python_model
+          - body
+          variable: result_json
+        - value_selector:
+          - call_python_model
+          - status_code
+          variable: http_status
+        - value_selector:
+          - build_request
+          - route
+          variable: route
+        selected: false
+        title: 标准化结果
+        type: end
+      height: 150
+      id: end
+      position:
+        x: 1100
+        y: 340
+      positionAbsolute:
+        x: 1100
+        y: 340
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 280
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.8
+  rag_pipeline_variables: []

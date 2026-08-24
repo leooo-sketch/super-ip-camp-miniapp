@@ -1,0 +1,103 @@
+const workflows = [
+  {
+    id: 'viral-film',
+    title: '一键创作爆款视频',
+    shortTitle: '一键成片',
+    subtitle: '上传本人首帧照片，自动完成创意、镜头与成片',
+    category: '视频生成',
+    badge: '可灵 3.0',
+    accent: 'red',
+    tokenCost: 89,
+    duration: '约 3-8 分钟',
+    provider: 'kling-direct',
+    model: 'kling-3.0-turbo',
+    enabled: true,
+    mediaMode: 'images',
+    minImages: 1,
+    maxImages: 1,
+    fields: ['topic', 'audience', 'platform', 'style', 'ratio', 'resolution'],
+    steps: ['提炼选题钩子', '生成导演提示词', '调用视频模型', '保存成片与发布文案']
+  },
+  {
+    id: 'same-style',
+    title: '授权素材同款重构',
+    shortTitle: '同款重构',
+    subtitle: '分析节奏与结构，用本人素材生成原创版本',
+    category: '视频重构',
+    badge: '可灵视频编辑',
+    accent: 'teal',
+    tokenCost: 199,
+    duration: '约 5-12 分钟',
+    provider: 'kling-omni-edit',
+    model: 'kling/kling-v3-omni-video-generation',
+    enabled: false,
+    mediaMode: 'video-and-images',
+    minImages: 1,
+    maxImages: 7,
+    fields: ['topic', 'platform', 'ratio', 'resolution', 'removeAudio'],
+    steps: ['校验素材授权', '拆解节奏与构图', '重建人物与场景', '输出原创成片']
+  },
+  {
+    id: 'ip-avatar',
+    title: '固定IP形象短片',
+    shortTitle: 'IP形象',
+    subtitle: '锁定本人形象，生成连续稳定的短视频镜头',
+    category: 'IP资产',
+    badge: '可灵 3.0',
+    accent: 'yellow',
+    tokenCost: 129,
+    duration: '约 4-10 分钟',
+    provider: 'kling-omni',
+    model: 'kling/kling-v3-omni-video-generation',
+    enabled: false,
+    mediaMode: 'images',
+    minImages: 3,
+    maxImages: 7,
+    fields: ['topic', 'scene', 'platform', 'style', 'ratio', 'resolution'],
+    steps: ['建立本人形象参考', '编排三镜头', '一致性生成', '输出成片']
+  },
+  {
+    id: 'fitness-diary',
+    title: '健身成长记录',
+    shortTitle: '健身日记',
+    subtitle: '真实体态、训练动作和自律文案一体生成',
+    category: '垂直模板',
+    badge: '景香苑模板',
+    accent: 'red',
+    tokenCost: 109,
+    duration: '约 4-10 分钟',
+    provider: 'kling-omni',
+    model: 'kling/kling-v3-omni-video-generation',
+    enabled: false,
+    mediaMode: 'video-and-images',
+    minImages: 3,
+    maxImages: 7,
+    fields: ['topic', 'scene', 'platform', 'style', 'ratio', 'resolution'],
+    steps: ['体态与动作校验', '生成训练分镜', '自然肌肉约束', '输出成片与文案']
+  },
+  {
+    id: 'talking-script',
+    title: '爆款口播脚本',
+    shortTitle: '口播脚本',
+    subtitle: '根据账号定位生成钩子、正文、CTA 与标题',
+    category: '文案工具',
+    badge: '低成本',
+    accent: 'teal',
+    tokenCost: 5,
+    duration: '约 20 秒',
+    provider: 'text-model',
+    model: 'doubao-seed',
+    enabled: false,
+    mediaMode: 'none',
+    minImages: 0,
+    maxImages: 0,
+    fields: ['topic', 'audience', 'platform', 'style'],
+    steps: ['分析人群痛点', '生成前三秒钩子', '组织口播结构', '输出多平台文案']
+  }
+]
+
+function getWorkflowById(id) {
+  return workflows.find((item) => item.id === id) || workflows[0]
+}
+
+module.exports = { workflows, getWorkflowById }

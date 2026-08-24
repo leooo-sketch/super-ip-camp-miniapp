@@ -1,0 +1,6 @@
+.agreement-page { min-height: 100vh; box-sizing: border-box; padding: 42rpx 32rpx 80rpx; background: #f4f5f7; }
+.agreement-title { color: #151719; font-size: 38rpx; font-weight: 850; }
+.agreement-date { margin-top: 10rpx; color: #8a8e93; font-size: 20rpx; }
+.section { margin-top: 24rpx; padding: 28rpx; background: #fff; border-radius: 14rpx; }
+.section-title { color: #1b1e21; font-size: 25rpx; font-weight: 750; }
+.section-copy { margin-top: 12rpx; color: #5d6268; font-size: 22rpx; line-height: 1.8; }

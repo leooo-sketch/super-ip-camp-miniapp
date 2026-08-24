@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/login/index",
+    "pages/create/index",
+    "pages/task/index",
+    "pages/works/index",
+    "pages/profile/index",
+    "pages/about/index",
+    "pages/agreement/index",
+    "pages/wallet/index",
+    "pages/games/index",
+    "pages/quiz/index",
+    "pages/party/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#111111",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "超级IP创造营",
+    "backgroundColor": "#F4F5F7",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#777A80",
+    "selectedColor": "#E63B32",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "创作"
+      },
+      {
+        "pagePath": "pages/works/index",
+        "text": "作品"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "__usePrivacyCheck__": true,
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

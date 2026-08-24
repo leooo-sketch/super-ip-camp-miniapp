@@ -1,0 +1,45 @@
+<view class="task-page">
+  <view wx:if="{{errorMessage}}" class="error-panel">{{errorMessage}}</view>
+
+  <block wx:if="{{task}}">
+    <view class="status-panel status-{{task.status}}">
+      <view class="status-top">
+        <view>
+          <view class="status-label">{{statusText}}</view>
+          <view class="task-title">{{task.workflowTitle}}</view>
+        </view>
+        <view class="progress-number">{{task.progress}}%</view>
+      </view>
+      <progress percent="{{task.progress}}" stroke-width="7" activeColor="#E63B32" backgroundColor="#E1E3E6" />
+      <view class="status-note" wx:if="{{task.status === 'queued'}}">任务已进入模型队列，请勿重复提交。</view>
+      <view class="status-note" wx:elif="{{task.status === 'processing'}}">模型正在生成画面，完成后会进入作品库。</view>
+      <view class="status-note" wx:elif="{{task.status === 'failed'}}">{{task.errorMessage || '本次生成未完成，已按服务端规则退回创作点。'}}</view>
+    </view>
+
+    <view wx:if="{{task.status === 'succeeded'}}" class="result-section">
+      <view wx:if="{{task.outputUrl}}" class="video-shell">
+        <video class="result-video" src="{{task.outputUrl}}" poster="{{task.coverUrl}}" controls object-fit="contain"></video>
+        <cover-view class="ai-label">AI生成</cover-view>
+      </view>
+      <view wx:else class="demo-result">
+        <image src="{{task.coverUrl}}" mode="aspectFill"></image>
+        <view class="demo-overlay">
+          <view class="demo-check">✓</view>
+          <view class="demo-title">成片正在同步</view>
+          <view class="demo-copy">生成已完成，成片地址正在写入作品库，请稍后刷新。</view>
+        </view>
+      </view>
+      <view class="disclosure">本内容由人工智能生成。发布或导出时必须保留 AI 标识，并再次确认音乐、人物和素材授权。</view>
+    </view>
+
+    <view class="detail-panel">
+      <view class="detail-title">任务信息</view>
+      <view class="detail-row"><text>创作主题</text><text class="detail-value">{{task.topic}}</text></view>
+      <view class="detail-row"><text>模型路由</text><text class="detail-value">{{task.provider}}</text></view>
+      <view class="detail-row"><text>消耗</text><text class="detail-value">{{task.tokenCost}} 创作点</text></view>
+      <view class="detail-row"><text>创建时间</text><text class="detail-value">{{createdAtText}}</text></view>
+      <view class="detail-row" bindtap="copyTaskId"><text>任务编号</text><text class="detail-value code">{{task.id}} 复制</text></view>
+    </view>
+    <button class="works-button" bindtap="openWorks">查看全部作品</button>
+  </block>
+</view>
