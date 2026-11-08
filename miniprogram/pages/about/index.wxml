@@ -24,7 +24,8 @@
   <view class="section">
     <view class="section-title">AI 内容标识</view>
     <view class="section-copy">生成结果属于 AI 生成或 AI 辅助创作内容。发布前应按照发布平台规则添加相应标识，并再次确认人物肖像、音乐、商品素材和参考视频的使用权。</view>
-    <view class="model-info">服务商：{{aiProviderName}} · 模型：{{aiModelName}} · 登记/备案号：{{aiRegistrationNumber || '待配置'}}</view>
+    <view class="model-info">可灵工作流：{{aiProviderName}} · 模型：{{aiModelName}} · 登记/备案号：{{aiRegistrationNumber || '待配置'}}</view>
+    <view class="model-info">混元视频工作流：{{hyProviderName}} · 模型：{{hyModelName}}。生成结果标注“AI生成”；该模型相关平台资质信息以服务商正式披露和审核材料为准。</view>
   </view>
 
   <view class="section">

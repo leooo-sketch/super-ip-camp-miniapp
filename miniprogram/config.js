@@ -3,5 +3,7 @@ module.exports = {
   AI_PROVIDER_NAME: '北京快手科技有限公司',
   AI_MODEL_NAME: '可灵',
   AI_REGISTRATION_NUMBER: 'Beijing-KeLing-202409250032',
+  HY_PROVIDER_NAME: '腾讯云大模型服务平台 TokenHub',
+  HY_MODEL_NAME: '混元 Hy-Video-1.5',
   PRIVACY_CONSENT_VERSION: '2026-08-24-v1'
 }

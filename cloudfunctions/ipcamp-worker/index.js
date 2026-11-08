@@ -1,6 +1,6 @@
 const cloud = require('wx-server-sdk')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV, timeout: 150000 })
 
 exports.main = async () => {
   if (!process.env.WORKER_TOKEN) throw new Error('未配置 WORKER_TOKEN')

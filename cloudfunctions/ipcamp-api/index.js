@@ -4,12 +4,14 @@ const { WORKFLOWS, PACKAGES } = require('./lib/catalog')
 const { validatePayload } = require('./lib/compliance')
 const { buildDirectorPrompt } = require('./lib/prompt')
 const { createProvider } = require('./lib/providers')
+const { dayKey, limits, assertCapacity } = require('./lib/hy-budget')
+const { inspectHyImage, persistHyVideo } = require('./lib/hy-media')
 const { QUESTIONS, QUESTION_MAP } = require('./lib/questions')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV, timeout: 150000 })
 const db = cloud.database()
 const command = db.command
-const CORE_COLLECTIONS = ['users', 'token_ledger', 'tasks', 'orders', 'game_rooms']
+const CORE_COLLECTIONS = ['users', 'token_ledger', 'tasks', 'orders', 'game_rooms', 'hy_video_budget']
 let coreCollectionsReady = null
 
 function isCollectionAlreadyExists(error) {
@@ -49,8 +51,28 @@ function publicUser(user) {
 }
 
 function publicTask(task) {
-  const { ownerOpenId, providerTaskId, providerTraceId, providerPollTraceId, requestId, payload, ...safeTask } = task
+  const { ownerOpenId, providerTaskId, providerTraceId, providerPollTraceId, requestId, payload,
+    hyBudgetId, hySlotReleasedAt, providerCreateStartedAt, syncLeaseId, syncLeaseUntil, lastPollError, ...safeTask } = task
+  if (task.provider === 'tokenhub-hy') {
+    safeTask.creationInput = {
+      topic: task.topic,
+      ...(task.workflowId === 'hy-text-video' ? { ratio: task.payload && task.payload.ratio } : {})
+    }
+  }
   return safeTask
+}
+
+async function publicOwnedTask(task) {
+  const result = publicTask(task)
+  if (!task.outputFileId) return result
+  try {
+    const files = await cloud.getTempFileURL({ fileList: [task.outputFileId] })
+    const first = files && files.fileList && files.fileList[0]
+    result.outputUrl = first && Number(first.status) === 0 ? first.tempFileURL : ''
+  } catch (error) {
+    result.outputUrl = ''
+  }
+  return result
 }
 
 function isMissingDocumentError(error) {
@@ -224,9 +246,10 @@ async function reserveTask(openid, workflow, payload) {
     const taskRef = transaction.collection('tasks').doc(taskId)
     try {
       const existing = await taskRef.get()
+      if (existing.data.workflowId !== workflow.id) throw new Error('请求编号已用于其他工作流')
       return { task: existing.data, existing: true }
     } catch (error) {
-      // A missing deterministic task ID means this request has not been charged.
+      if (!isMissingDocumentError(error)) throw error
     }
 
     const userRef = transaction.collection('users').doc(openid)
@@ -235,6 +258,32 @@ async function reserveTask(openid, workflow, payload) {
     if (Number(user.balance || 0) < workflow.tokenCost) throw new Error('创作点余额不足')
 
     const now = Date.now()
+    const hy = workflow.provider === 'tokenhub-hy'
+    const hyBudgetId = hy ? `tokenhub-hy_${dayKey(now)}` : ''
+    if (hy) {
+      const budgetRef = transaction.collection('hy_video_budget').doc(hyBudgetId)
+      const globalRef = transaction.collection('hy_video_budget').doc('tokenhub-hy_global')
+      let budget = null
+      let globalBudget = null
+      try { budget = (await budgetRef.get()).data } catch (error) {
+        if (!isMissingDocumentError(error)) throw error
+      }
+      try { globalBudget = (await globalRef.get()).data } catch (error) {
+        if (!isMissingDocumentError(error)) throw error
+      }
+      assertCapacity({ submitted: budget && budget.submitted, active: globalBudget && globalBudget.active }, user, limits())
+      const next = {
+        provider: 'tokenhub-hy',
+        day: dayKey(now),
+        submitted: Number(budget && budget.submitted || 0) + 1,
+        updatedAt: now
+      }
+      if (budget) await budgetRef.update({ data: next })
+      else await budgetRef.set({ data: next })
+      const globalNext = { provider: 'tokenhub-hy', active: Number(globalBudget && globalBudget.active || 0) + 1, updatedAt: now }
+      if (globalBudget) await globalRef.update({ data: globalNext })
+      else await globalRef.set({ data: globalNext })
+    }
     const task = {
       id: taskId,
       ownerOpenId: openid,
@@ -245,7 +294,7 @@ async function reserveTask(openid, workflow, payload) {
       status: 'queued',
       progress: 5,
       tokenCost: workflow.tokenCost,
-      provider: String(process.env.VIDEO_PROVIDER || 'kling-direct'),
+      provider: workflow.provider || String(process.env.VIDEO_PROVIDER || 'kling-direct').toLowerCase(),
       providerTaskId: '',
       coverUrl: '',
       outputUrl: '',
@@ -253,10 +302,15 @@ async function reserveTask(openid, workflow, payload) {
       sourceType: payload.sourceType,
       aiDisclosure: true,
       payload,
+      ...(hy ? { hyBudgetId, hySlotReleasedAt: null } : {}),
       createdAt: now,
       updatedAt: now
     }
-    await userRef.update({ data: { balance: command.inc(-workflow.tokenCost), updatedAt: now } })
+    await userRef.update({ data: {
+      balance: command.inc(-workflow.tokenCost),
+      ...(hy ? { hyActive: Number(user.hyActive || 0) + 1 } : {}),
+      updatedAt: now
+    } })
     await taskRef.set({ data: task })
     await transaction.collection('token_ledger').doc(`${taskId}_debit`).set({ data: {
       ownerOpenId: openid,
@@ -269,14 +323,27 @@ async function reserveTask(openid, workflow, payload) {
   })
 }
 
-async function refundTask(taskId, reason) {
+async function releaseHySlot(transaction, task, now, userChanges = {}) {
+  if (task.provider !== 'tokenhub-hy' || !task.hyBudgetId || task.hySlotReleasedAt) return false
+  const budgetRef = transaction.collection('hy_video_budget').doc('tokenhub-hy_global')
+  const budget = (await budgetRef.get()).data
+  await budgetRef.update({ data: { active: Math.max(0, Number(budget.active || 0) - 1), updatedAt: now } })
+  const userRef = transaction.collection('users').doc(task.ownerOpenId)
+  const user = (await userRef.get()).data
+  await userRef.update({ data: { ...userChanges, hyActive: Math.max(0, Number(user.hyActive || 0) - 1), updatedAt: now } })
+  return true
+}
+
+async function refundTask(taskId, reason, leaseId = '') {
   return db.runTransaction(async (transaction) => {
     const taskRef = transaction.collection('tasks').doc(taskId)
     const taskResult = await taskRef.get()
     const task = taskResult.data
-    if (task.refundedAt) return task
+    if (leaseId && task.syncLeaseId !== leaseId) return task
+    if (task.refundedAt || task.status === 'succeeded') return task
     const now = Date.now()
-    await transaction.collection('users').doc(task.ownerOpenId).update({
+    const released = await releaseHySlot(transaction, task, now, { balance: command.inc(task.tokenCost) })
+    if (!released) await transaction.collection('users').doc(task.ownerOpenId).update({
       data: { balance: command.inc(task.tokenCost), updatedAt: now }
     })
     await taskRef.update({ data: {
@@ -284,6 +351,9 @@ async function refundTask(taskId, reason) {
       progress: 100,
       errorMessage: String(reason || '模型生成失败').slice(0, 300),
       refundedAt: now,
+      syncLeaseId: '',
+      syncLeaseUntil: 0,
+      ...(task.provider === 'tokenhub-hy' ? { hySlotReleasedAt: now } : {}),
       updatedAt: now
     } })
     await transaction.collection('token_ledger').doc(`${taskId}_refund`).set({ data: {
@@ -304,21 +374,26 @@ async function createTask(openid, input) {
   if (!workflow) throw new Error('创作工作流不存在')
   if (workflow.enabled === false) throw new Error('该创作工作流正在适配，暂未开放')
   const payload = validatePayload(input, workflow)
-  if (!payload.requestId || String(payload.requestId).length > 100) throw new Error('缺少有效的请求编号')
+  if (typeof payload.requestId !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(payload.requestId)) throw new Error('缺少有效的请求编号')
 
   const reservation = await reserveTask(openid, workflow, payload)
   if (reservation.existing) return publicTask(reservation.task)
 
+  let providerTask
   try {
     const images = await resolveMedia(payload.images)
+    if (workflow.provider === 'tokenhub-hy' && images.length) await inspectHyImage(images[0])
     const videoList = payload.video ? await resolveMedia([payload.video]) : []
-    const provider = createProvider()
-    const providerTask = await provider.create({
+    const provider = createProvider(reservation.task.provider)
+    if (workflow.provider === 'tokenhub-hy') {
+      await db.collection('tasks').doc(reservation.task.id).update({ data: { providerCreateStartedAt: Date.now() } })
+    }
+    providerTask = await provider.create({
       workflowId: workflow.id,
       mode: workflow.providerMode,
       images,
       video: videoList[0],
-      prompt: buildDirectorPrompt(payload),
+      prompt: workflow.provider === 'tokenhub-hy' ? payload.topic : buildDirectorPrompt(payload),
       aspectRatio: payload.ratio,
       resolution: payload.resolution,
       duration: payload.duration,
@@ -326,8 +401,20 @@ async function createTask(openid, input) {
       removeAudio: payload.removeAudio
     })
     if (!providerTask.providerTaskId) throw new Error('视频服务未返回任务编号')
+  } catch (error) {
+    if (workflow.provider === 'tokenhub-hy' && error.submissionUncertain) {
+      const message = '提交结果待人工核对，请勿再次创建；联系运营人员核对 TokenHub 任务与账单'
+      await db.collection('tasks').doc(reservation.task.id).update({ data: {
+        status: 'submission_unknown', errorMessage: message, updatedAt: Date.now()
+      } })
+      return publicTask({ ...reservation.task, status: 'submission_unknown', errorMessage: message })
+    }
+    await refundTask(reservation.task.id, error.message)
+    throw new Error(`创建失败，创作点已退回：${error.message}`)
+  }
+  try {
     await db.collection('tasks').doc(reservation.task.id).update({ data: {
-      status: 'processing',
+      status: workflow.provider === 'tokenhub-hy' ? 'queued' : 'processing',
       progress: 12,
       providerTaskId: providerTask.providerTaskId,
       providerState: providerTask.rawState,
@@ -335,10 +422,10 @@ async function createTask(openid, input) {
       providerTraceId: providerTask.traceId || '',
       updatedAt: Date.now()
     } })
-    return publicTask({ ...reservation.task, status: 'processing', progress: 12 })
+    return publicTask({ ...reservation.task, status: workflow.provider === 'tokenhub-hy' ? 'queued' : 'processing', progress: 12 })
   } catch (error) {
-    await refundTask(reservation.task.id, error.message)
-    throw new Error(`创建失败，创作点已退回：${error.message}`)
+    // The provider may already have accepted and billed this task. Never submit it twice.
+    throw new Error('模型任务可能已提交，保存状态失败；请用原请求编号查询任务，不要重复创建')
   }
 }
 
@@ -347,7 +434,7 @@ async function getOwnedTask(openid, id) {
   if (!id) throw new Error('缺少任务编号')
   const result = await db.collection('tasks').doc(id).get()
   if (!result.data || result.data.ownerOpenId !== openid) throw new Error('任务不存在')
-  return publicTask(result.data)
+  return publicOwnedTask(result.data)
 }
 
 async function listOwnedTasks(openid) {
@@ -357,7 +444,7 @@ async function listOwnedTasks(openid) {
     .orderBy('createdAt', 'desc')
     .limit(50)
     .get()
-  return result.data.map(publicTask)
+  return Promise.all(result.data.map(publicOwnedTask))
 }
 
 async function createOrder(openid, packageId) {
@@ -667,10 +754,24 @@ async function guessPartyNumber(openid, input) {
 
 async function deleteAccount(openid, confirmation) {
   if (confirmation !== 'DELETE') throw new Error('缺少账号删除确认')
+  const user = await getUser(openid)
+  if (user && Number(user.hyActive || 0) > 0) throw new Error('当前有混元视频任务待完成或待人工核对，请处理后再注销账户')
 
   const taskResult = await db.collection('tasks').where({ ownerOpenId: openid }).limit(100).get()
   const fileIds = []
   for (const task of taskResult.data || []) {
+    if (task.provider === 'tokenhub-hy' && task.hyBudgetId && !task.hySlotReleasedAt) {
+      await db.runTransaction(async (transaction) => {
+        const ref = transaction.collection('tasks').doc(task.id)
+        const fresh = (await ref.get()).data
+        if (!fresh.hySlotReleasedAt) {
+          const now = Date.now()
+          await releaseHySlot(transaction, fresh, now)
+          await ref.update({ data: { hySlotReleasedAt: now, status: 'deleted', syncLeaseId: '', syncLeaseUntil: 0 } })
+        }
+      })
+    }
+    if (String(task.outputFileId || '').startsWith('cloud://')) fileIds.push(task.outputFileId)
     const payload = task.payload || {}
     for (const value of [].concat(payload.images || [], payload.video || []).filter(Boolean)) {
       if (String(value).startsWith('cloud://')) fileIds.push(value)
@@ -701,44 +802,165 @@ async function deleteAccount(openid, confirmation) {
   return { deleted: true }
 }
 
-async function syncTasks(workerToken) {
-  if (!process.env.WORKER_TOKEN || workerToken !== process.env.WORKER_TOKEN) throw new Error('无权执行任务同步')
-  const result = await db.collection('tasks').where({ status: 'processing' }).limit(20).get()
-  const provider = createProvider()
-  const summary = { checked: result.data.length, succeeded: 0, failed: 0, processing: 0 }
+const HY_TASK_TIMEOUT_MS = 30 * 60 * 1000
+const SYNC_LEASE_MS = 4 * 60 * 1000
+const WORKER_PROCESS_BUDGET_MS = 75 * 1000
 
-  for (const task of result.data) {
-    if (!task.providerTaskId) continue
-    try {
-      const state = await provider.query(task.providerTaskId)
-      if (state.status === 'succeeded') {
-        await db.collection('tasks').doc(task.id).update({ data: {
-          status: 'succeeded',
-          progress: 100,
-          outputUrl: state.outputUrl || '',
-          coverUrl: state.coverUrl || '',
-          providerPollTraceId: state.traceId || '',
-          updatedAt: Date.now()
-        } })
-        summary.succeeded += 1
-      } else if (state.status === 'failed') {
-        await refundTask(task.id, state.errorMessage)
-        summary.failed += 1
+async function claimTaskForSync(taskId) {
+  return db.runTransaction(async (transaction) => {
+    const ref = transaction.collection('tasks').doc(taskId)
+    const task = (await ref.get()).data
+    const now = Date.now()
+    if (!task || !['queued', 'processing', 'submission_unknown'].includes(task.status) || Number(task.syncLeaseUntil || 0) > now) return null
+    const leaseId = crypto.randomBytes(12).toString('hex')
+    await ref.update({ data: { syncLeaseId: leaseId, syncLeaseUntil: now + SYNC_LEASE_MS } })
+    return { ...task, syncLeaseId: leaseId }
+  })
+}
+
+async function updateClaimedTask(task, data) {
+  return db.runTransaction(async (transaction) => {
+    const ref = transaction.collection('tasks').doc(task.id)
+    const fresh = (await ref.get()).data
+    if (!fresh || fresh.syncLeaseId !== task.syncLeaseId || !['queued', 'processing', 'submission_unknown'].includes(fresh.status)) return false
+    await ref.update({ data: { ...data, syncLeaseId: '', syncLeaseUntil: 0, updatedAt: Date.now() } })
+    return true
+  })
+}
+
+async function completeClaimedTask(task, state, outputFileId = '') {
+  return db.runTransaction(async (transaction) => {
+    const ref = transaction.collection('tasks').doc(task.id)
+    const fresh = (await ref.get()).data
+    if (!fresh || fresh.syncLeaseId !== task.syncLeaseId || !['queued', 'processing', 'submission_unknown'].includes(fresh.status)) return false
+    const now = Date.now()
+    await releaseHySlot(transaction, fresh, now)
+    await ref.update({ data: {
+      status: 'succeeded',
+      progress: 100,
+      outputUrl: outputFileId ? '' : String(state.outputUrl || ''),
+      ...(outputFileId ? { outputFileId } : {}),
+      coverUrl: state.coverUrl || '',
+      providerPollTraceId: state.traceId || '',
+      ...(fresh.provider === 'tokenhub-hy' ? { hySlotReleasedAt: now } : {}),
+      syncLeaseId: '', syncLeaseUntil: 0, updatedAt: now
+    } })
+    return true
+  })
+}
+
+async function recordPollError(task, error) {
+  return updateClaimedTask(task, {
+    lastPollError: String(error.message || error).slice(0, 300),
+    pollFailures: command.inc(1)
+  })
+}
+
+function assertWorkerToken(workerToken) {
+  if (!process.env.WORKER_TOKEN || workerToken !== process.env.WORKER_TOKEN) throw new Error('无权执行任务同步')
+}
+
+async function resolveUnknownTask(input) {
+  assertWorkerToken(input.workerToken)
+  const taskId = String(input.taskId || '')
+  if (!/^[a-f0-9]{32}$/.test(taskId)) throw new Error('无效的任务编号')
+  if (input.decision === 'refund') {
+    if (input.confirmation !== 'MANUAL_REFUND_CONFIRMED') throw new Error('缺少人工核对确认')
+    const result = await db.collection('tasks').doc(taskId).get()
+    const task = result.data
+    if (task && task.provider === 'tokenhub-hy' && task.status === 'failed' && task.refundedAt) return { id: taskId, status: 'failed' }
+    if (!task || task.provider !== 'tokenhub-hy' || task.status !== 'submission_unknown') throw new Error('任务不是待核对状态')
+    const refunded = await refundTask(taskId, '运营人员核对后手动退回创作点')
+    return { id: taskId, status: refunded.status }
+  }
+  if (input.decision === 'attach') {
+    const providerTaskId = String(input.providerTaskId || '')
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(providerTaskId)) throw new Error('无效的 TokenHub 任务编号')
+    return db.runTransaction(async (transaction) => {
+      const ref = transaction.collection('tasks').doc(taskId)
+      const task = (await ref.get()).data
+      if (task && task.provider === 'tokenhub-hy' && task.status === 'queued' && task.providerTaskId === providerTaskId) {
+        return { id: taskId, status: 'queued' }
+      }
+      if (!task || task.provider !== 'tokenhub-hy' || task.status !== 'submission_unknown' || task.providerTaskId) {
+        throw new Error('任务不是可关联的待核对状态')
+      }
+      await ref.update({ data: {
+        providerTaskId, status: 'queued', progress: 12,
+        errorMessage: '', updatedAt: Date.now()
+      } })
+      return { id: taskId, status: 'queued' }
+    })
+  }
+  throw new Error('不支持的人工核对操作')
+}
+
+async function syncTasks(workerToken) {
+  assertWorkerToken(workerToken)
+  const startedAt = Date.now()
+  const [processing, queued, unknown] = await Promise.all([
+    db.collection('tasks').where({ status: 'processing' }).orderBy('updatedAt', 'asc').limit(10).get(),
+    db.collection('tasks').where({ status: 'queued' }).orderBy('updatedAt', 'asc').limit(10).get(),
+    db.collection('tasks').where({ status: 'submission_unknown' }).orderBy('updatedAt', 'asc').limit(10).get()
+  ])
+  const candidates = [...processing.data, ...queued.data, ...unknown.data]
+    .filter((task) => task.status !== 'submission_unknown' || task.providerTaskId)
+    .sort((a, b) => Number(a.updatedAt || a.createdAt || 0) - Number(b.updatedAt || b.createdAt || 0))
+    .slice(0, 3)
+  const summary = { checked: candidates.length, succeeded: 0, failed: 0, processing: 0 }
+
+  for (const item of candidates) {
+    if (Date.now() - startedAt >= WORKER_PROCESS_BUDGET_MS) break
+    const task = await claimTaskForSync(item.id)
+    if (!task) continue
+    if (!task.providerTaskId) {
+      if (Date.now() - task.createdAt > 10 * 60 * 1000) {
+        if (task.provider === 'tokenhub-hy' && task.providerCreateStartedAt) {
+          await updateClaimedTask(task, { status: 'submission_unknown', errorMessage: '提交状态待人工核对，请勿再次创建' })
+          summary.processing += 1
+        } else {
+          await refundTask(task.id, '任务未能提交，创作点已退回', task.syncLeaseId)
+          summary.failed += 1
+        }
       } else {
-        await db.collection('tasks').doc(task.id).update({ data: {
-          progress: Math.max(task.progress || 12, state.progress || 25),
-          providerPollTraceId: state.traceId || '',
-          updatedAt: Date.now()
-        } })
+        await updateClaimedTask(task, { progress: task.progress || 5 })
         summary.processing += 1
       }
+      continue
+    }
+    try {
+      const provider = createProvider(task.provider)
+      const state = await provider.query(task.providerTaskId)
+      if (state.status === 'succeeded') {
+        const outputFileId = task.provider === 'tokenhub-hy'
+          ? await persistHyVideo(cloud, task.id, state.outputUrl)
+          : ''
+        if (await completeClaimedTask(task, state, outputFileId)) summary.succeeded += 1
+      } else if (state.status === 'failed') {
+        await refundTask(task.id, state.errorMessage, task.syncLeaseId)
+        summary.failed += 1
+      } else if (['queued', 'processing'].includes(state.status)) {
+        if (task.provider === 'tokenhub-hy' && Date.now() - task.createdAt > HY_TASK_TIMEOUT_MS) {
+          await refundTask(task.id, '混元视频任务超时，创作点已退回', task.syncLeaseId)
+          summary.failed += 1
+        } else {
+          await updateClaimedTask(task, {
+            status: state.status,
+            progress: Math.max(task.progress || 12, state.progress || 20),
+            providerState: state.rawState || state.status,
+            providerPollTraceId: state.traceId || ''
+          })
+          summary.processing += 1
+        }
+      } else throw new Error('视频服务返回未知任务状态')
     } catch (error) {
-      await db.collection('tasks').doc(task.id).update({ data: {
-        lastPollError: String(error.message || error).slice(0, 300),
-        pollFailures: command.inc(1),
-        updatedAt: Date.now()
-      } })
-      summary.processing += 1
+      if (task.provider === 'tokenhub-hy' && ([401, 403].includes(error.status) || Date.now() - task.createdAt > HY_TASK_TIMEOUT_MS)) {
+        await refundTask(task.id, error.message, task.syncLeaseId)
+        summary.failed += 1
+      } else {
+        await recordPollError(task, error)
+        summary.processing += 1
+      }
     }
   }
   return summary
@@ -749,6 +971,7 @@ async function route(event) {
   const data = event.data || {}
   await ensureCoreCollections()
   if (action === 'worker.sync') return syncTasks(data.workerToken)
+  if (action === 'worker.resolveUnknown') return resolveUnknownTask(data)
 
   const context = cloud.getWXContext()
   const openid = context.OPENID

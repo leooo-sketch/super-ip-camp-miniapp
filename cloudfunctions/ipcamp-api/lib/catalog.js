@@ -1,4 +1,26 @@
 const WORKFLOWS = {
+  'hy-text-video': {
+    id: 'hy-text-video',
+    title: '混元文生视频',
+    tokenCost: 89,
+    enabled: true,
+    provider: 'tokenhub-hy',
+    providerMode: 'text2video',
+    minImages: 0,
+    maxImages: 0,
+    requiresVideo: false
+  },
+  'hy-image-video': {
+    id: 'hy-image-video',
+    title: '混元图生视频',
+    tokenCost: 89,
+    enabled: true,
+    provider: 'tokenhub-hy',
+    providerMode: 'img2video',
+    minImages: 1,
+    maxImages: 1,
+    requiresVideo: false
+  },
   'fashion-video': {
     id: 'fashion-video',
     title: 'AI穿搭视频工作流',

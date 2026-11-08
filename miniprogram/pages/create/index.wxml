@@ -12,8 +12,8 @@
   <view class="form-section">
     <view class="section-label">1. 创作设定</view>
     <view class="field">
-      <view class="field-label">一句话创意</view>
-      <textarea class="textarea" maxlength="240" auto-height placeholder="例如：下班后坚持训练的第30天，真实、有力量、不夸张" value="{{form.topic}}" data-field="topic" bindinput="handleInput" />
+      <view class="field-label">{{topicLabel}}</view>
+      <textarea class="textarea" maxlength="240" auto-height placeholder="{{isHyImageVideo ? '例如：镜头缓慢推进，画面中的主体自然转头' : (isHyTextVideo ? '例如：清晨的山间云海，镜头缓慢向前移动' : '例如：下班后坚持训练的第30天，真实、有力量、不夸张')}}" value="{{form.topic}}" data-field="topic" bindinput="handleInput" />
       <view class="counter">{{form.topic.length}} / 240</view>
     </view>
     <view wx:if="{{hasAudience}}" class="field">
@@ -24,24 +24,25 @@
       <view class="field-label">场景要求</view>
       <input class="input" placeholder="例如：健身房、自然侧光、手机纪实" value="{{form.scene}}" data-field="scene" bindinput="handleInput" />
     </view>
-    <view class="field-grid">
-      <picker range="{{platformOptions}}" value="{{platformIndex}}" data-field="platform" bindchange="handlePicker">
+    <view wx:if="{{showPlatform || showStyle || showRatio || showResolution}}" class="field-grid {{isHyWorkflow ? 'hy-field-grid' : ''}}">
+      <picker wx:if="{{showPlatform}}" range="{{platformOptions}}" value="{{platformIndex}}" data-field="platform" bindchange="handlePicker">
         <view class="picker-box"><text class="picker-label">发布平台</text><text>{{platformOptions[platformIndex]}} 〉</text></view>
       </picker>
-      <picker range="{{styleOptions}}" value="{{styleIndex}}" data-field="style" bindchange="handlePicker">
+      <picker wx:if="{{showStyle}}" range="{{styleOptions}}" value="{{styleIndex}}" data-field="style" bindchange="handlePicker">
         <view class="picker-box"><text class="picker-label">视觉风格</text><text>{{styleOptions[styleIndex]}} 〉</text></view>
       </picker>
-      <picker range="{{ratioOptions}}" value="{{ratioIndex}}" data-field="ratio" bindchange="handlePicker">
+      <picker wx:if="{{showRatio}}" range="{{ratioOptions}}" value="{{ratioIndex}}" data-field="ratio" bindchange="handlePicker">
         <view class="picker-box"><text class="picker-label">画面比例</text><text>{{ratioOptions[ratioIndex]}} 〉</text></view>
       </picker>
-      <picker range="{{resolutionOptions}}" value="{{resolutionIndex}}" data-field="resolution" bindchange="handlePicker">
+      <picker wx:if="{{showResolution}}" range="{{resolutionOptions}}" value="{{resolutionIndex}}" data-field="resolution" bindchange="handlePicker">
         <view class="picker-box"><text class="picker-label">清晰度</text><text>{{resolutionOptions[resolutionIndex]}} 〉</text></view>
       </picker>
     </view>
+    <view wx:if="{{isHyWorkflow}}" class="fixed-spec">固定生成 5 秒 · 720p{{isHyImageVideo ? ' · 画面比例由首帧图片决定' : ''}}</view>
   </view>
 
-  <view class="form-section">
-    <view class="section-label">2. 本人形象素材</view>
+  <view wx:if="{{showImageUpload}}" class="form-section">
+    <view class="section-label">{{isHyImageVideo ? '2. 首帧图片' : '2. 本人形象素材'}}</view>
     <view class="upload-grid">
       <view wx:for="{{images}}" wx:key="fileId" class="media-tile">
         <image src="{{item.tempPath}}" mode="aspectFill"></image>
@@ -49,10 +50,11 @@
       </view>
       <view wx:if="{{images.length < workflow.maxImages}}" class="upload-tile" bindtap="chooseImages">
         <view class="upload-symbol">＋</view>
-        <view>上传照片</view>
+        <view>{{isHyImageVideo ? '上传首帧' : '上传照片'}}</view>
       </view>
     </view>
-    <view wx:if="{{workflow.maxImages === 1}}" class="media-note">请上传 1 张清晰本人照片作为首帧参考，避免过度美颜。</view>
+    <view wx:if="{{isHyImageVideo}}" class="media-note">仅接收 1 张本人原创或已获授权的 JPG/PNG 图片，不超过 10MB。生成画幅与图片一致。</view>
+    <view wx:elif="{{workflow.maxImages === 1}}" class="media-note">请上传 1 张清晰本人照片作为首帧参考，避免过度美颜。</view>
     <view wx:else class="media-note">{{workflow.minImages}}-{{workflow.maxImages}} 张清晰照片，建议正面、侧面和半身，避免过度美颜。</view>
 
     <block wx:if="{{workflow.mediaMode === 'video-and-images'}}">
@@ -70,12 +72,12 @@
   </view>
 
   <view class="form-section">
-    <view class="section-label">3. 权利确认</view>
-    <picker range="{{sourceOptions}}" value="{{sourceIndex}}" data-field="source" bindchange="handlePicker">
+    <view class="section-label">{{rightsSectionTitle}}</view>
+    <picker wx:if="{{showSourcePicker}}" range="{{sourceOptions}}" value="{{sourceIndex}}" data-field="source" bindchange="handlePicker">
       <view class="source-picker"><text>素材来源</text><text>{{sourceOptions[sourceIndex]}} 〉</text></view>
     </picker>
     <view class="switch-row">
-      <view><view class="switch-title">素材权利确认</view><view class="switch-note">我拥有素材，或已取得人物肖像、视频、音乐等必要授权</view></view>
+      <view><view class="switch-title">{{isHyTextVideo ? '创作内容权利确认' : '素材权利确认'}}</view><view class="switch-note">{{isHyTextVideo ? '提示词和生成内容不用于冒充他人或侵犯他人权利' : '我拥有素材，或已取得人物肖像、视频、音乐等必要授权'}}</view></view>
       <switch color="#147D78" checked="{{form.authorized}}" data-field="authorized" bindchange="handleSwitch" />
     </view>
     <view class="switch-row">
@@ -90,7 +92,7 @@
 
   <view class="submit-spacer"></view>
   <view class="submit-bar">
-    <view><view class="submit-cost">{{workflow.tokenCost}} 创作点</view><view class="submit-note">创建成功后扣除</view></view>
+    <view><view class="submit-cost">{{workflow.tokenCost}} 创作点</view><view class="submit-note">{{isHyWorkflow ? '提交时预扣，失败按规则退还' : '创建成功后扣除'}}</view></view>
     <button class="submit-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">开始创作</button>
   </view>
 </view>

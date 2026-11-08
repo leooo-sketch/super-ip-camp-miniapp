@@ -16,10 +16,12 @@
 .task-top,.task-foot { display: flex; align-items: center; justify-content: space-between; }
 .status { color: #0e635f; font-size: 20rpx; font-weight: 700; }
 .status-processing,.status-queued { color: #876003; }
+.status-submission_unknown { color: #a45b00; }
 .status-failed { color: #b92520; }
 .time { color: #96999f; font-size: 18rpx; }
 .task-name { margin-top: 14rpx; font-size: 27rpx; font-weight: 750; }
 .task-topic { overflow: hidden; margin-top: 7rpx; color: #73777f; font-size: 21rpx; white-space: nowrap; text-overflow: ellipsis; }
+.task-warning { margin-top: 7rpx; color: #a45b00; font-size: 19rpx; font-weight: 700; }
 .task-foot { margin-top: auto; color: #777a80; font-size: 19rpx; }
 .empty-title { color: #151719; font-size: 28rpx; font-weight: 750; }
 .empty-note { margin: 10rpx 0 24rpx; line-height: 1.5; }

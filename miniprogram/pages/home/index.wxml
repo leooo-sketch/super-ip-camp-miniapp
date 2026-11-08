@@ -21,16 +21,16 @@
   </view>
 
   <view class="quick-grid">
-    <view class="quick-action quick-red" data-id="viral-film" bindtap="handleWorkflowSelect">
+    <view class="quick-action quick-red" data-id="hy-text-video" bindtap="handleWorkflowSelect">
       <view class="quick-index">01</view>
-      <view class="quick-title">一键成片</view>
-      <view class="quick-note">从主题到15秒成片</view>
+      <view class="quick-title">混元文生视频</view>
+      <view class="quick-note">提示词生成 5 秒视频</view>
       <view class="quick-arrow">→</view>
     </view>
-    <view class="quick-action quick-dark" data-id="same-style" bindtap="handleWorkflowSelect">
+    <view class="quick-action quick-dark" data-id="hy-image-video" bindtap="handleWorkflowSelect">
       <view class="quick-index">02</view>
-      <view class="quick-title">同款重构 · 适配中</view>
-      <view class="quick-note">模型接口完成适配后开放</view>
+      <view class="quick-title">混元图生视频</view>
+      <view class="quick-note">一张图片生成动态画面</view>
       <view class="quick-arrow">→</view>
     </view>
   </view>
