@@ -4,9 +4,17 @@ const { KlingProvider } = require('./kling')
 const { ToApisProvider } = require('./toapis')
 const { KlingDirectProvider } = require('./kling-direct')
 const { DifyProvider } = require('./dify')
+const { TokenhubHyProvider } = require('./tokenhub-hy')
 
-function createProvider() {
-  const provider = String(process.env.VIDEO_PROVIDER || 'kling-direct').toLowerCase()
+function createProvider(name) {
+  const provider = String(name || process.env.VIDEO_PROVIDER || 'kling-direct').toLowerCase()
+  if (provider === 'tokenhub-hy') {
+    return new TokenhubHyProvider({
+      apiKey: process.env.TOKENHUB_API_KEY,
+      baseUrl: process.env.TOKENHUB_BASE_URL,
+      model: process.env.TOKENHUB_VIDEO_MODEL
+    })
+  }
   if (provider === 'dify') {
     return new DifyProvider({
       apiKey: process.env.DIFY_WORKFLOW_API_KEY,
@@ -36,7 +44,8 @@ function createProvider() {
     })
   }
   if (provider === 'vidu') return new ViduProvider({ token: process.env.VIDU_API_TOKEN })
-  return new MockProvider()
+  if (provider === 'mock') return new MockProvider()
+  throw new Error(`不支持的视频服务提供方：${provider}`)
 }
 
 module.exports = { createProvider }

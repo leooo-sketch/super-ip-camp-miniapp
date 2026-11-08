@@ -4,11 +4,12 @@ const { formatDate } = require('../../utils/format')
 const FILTERS = [
   { id: 'all', label: '全部' },
   { id: 'processing', label: '生成中' },
+  { id: 'submission_unknown', label: '待核对' },
   { id: 'succeeded', label: '已完成' },
   { id: 'failed', label: '失败' }
 ]
 
-const STATUS_TEXT = { queued: '排队中', processing: '生成中', succeeded: '已完成', failed: '失败' }
+const STATUS_TEXT = { queued: '排队中', processing: '生成中', submission_unknown: '提交待核对', succeeded: '已完成', failed: '失败' }
 
 Page({
   data: { filters: FILTERS, activeFilter: 'all', tasks: [], visibleTasks: [], loading: true, registered: false },

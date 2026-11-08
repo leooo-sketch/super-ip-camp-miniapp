@@ -8,11 +8,12 @@
           <view class="status-label">{{statusText}}</view>
           <view class="task-title">{{task.workflowTitle}}</view>
         </view>
-        <view class="progress-number">{{task.progress}}%</view>
+        <view wx:if="{{task.status !== 'submission_unknown'}}" class="progress-number">{{task.progress}}%</view>
       </view>
-      <progress percent="{{task.progress}}" stroke-width="7" activeColor="#E63B32" backgroundColor="#E1E3E6" />
+      <progress wx:if="{{task.status !== 'submission_unknown'}}" percent="{{task.progress}}" stroke-width="7" activeColor="#E63B32" backgroundColor="#E1E3E6" />
       <view class="status-note" wx:if="{{task.status === 'queued'}}">任务已进入模型队列，请勿重复提交。</view>
       <view class="status-note" wx:elif="{{task.status === 'processing'}}">模型正在生成画面，完成后会进入作品库。</view>
+      <view class="status-note status-warning" wx:elif="{{task.status === 'submission_unknown'}}">提交结果暂时无法确认，可能已产生费用。请勿重复创建或重新生成，联系管理员并提供下方任务编号核查。{{task.errorMessage}}</view>
       <view class="status-note" wx:elif="{{task.status === 'failed'}}">{{task.errorMessage || '本次生成未完成，已按服务端规则退回创作点。'}}</view>
     </view>
 
@@ -30,6 +31,7 @@
         </view>
       </view>
       <view class="disclosure">本内容由人工智能生成。发布或导出时必须保留 AI 标识，并再次确认音乐、人物和素材授权。</view>
+      <button wx:if="{{isHyTask && task.outputFileId}}" class="save-button" loading="{{savingVideo}}" disabled="{{savingVideo}}" bindtap="saveVideo">保存视频到相册</button>
     </view>
 
     <view class="detail-panel">
@@ -41,5 +43,7 @@
       <view class="detail-row" bindtap="copyTaskId"><text>任务编号</text><text class="detail-value code">{{task.id}} 复制</text></view>
     </view>
     <button class="works-button" bindtap="openWorks">查看全部作品</button>
+    <button wx:if="{{isHyTask && (task.status === 'succeeded' || task.status === 'failed')}}" class="again-button" bindtap="createAgain">用原提示词再次创作</button>
+    <view wx:if="{{isHyTask && task.workflowId === 'hy-image-video' && (task.status === 'succeeded' || task.status === 'failed')}}" class="again-note">再次创作需重新选择首帧图片并确认素材权利。</view>
   </block>
 </view>

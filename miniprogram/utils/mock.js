@@ -30,6 +30,7 @@ function createDemoTask(payload) {
   const profile = getDemoProfile()
   const workflow = workflows.find((item) => item.id === payload.workflowId)
   if (!workflow) throw new Error('工作流不存在')
+  if (workflow.provider === 'tokenhub-hy') throw new Error('演示模式不能生成混元视频，请先连接并部署云开发环境')
   if (profile.balance < workflow.tokenCost) throw new Error('创作点余额不足')
 
   profile.balance -= workflow.tokenCost

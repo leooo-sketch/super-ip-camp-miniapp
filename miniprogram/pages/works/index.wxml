@@ -31,7 +31,8 @@
         <view class="task-top"><text class="status status-{{item.status}}">{{item.statusText}}</text><text class="time">{{item.createdAtText}}</text></view>
         <view class="task-name">{{item.workflowTitle}}</view>
         <view class="task-topic">{{item.topic}}</view>
-        <view class="task-foot"><text>{{item.progress}}%</text><text>{{item.tokenCost}} 创作点 〉</text></view>
+        <view wx:if="{{item.status === 'submission_unknown'}}" class="task-warning">请勿重提 · 联系管理员核查</view>
+        <view class="task-foot"><text wx:if="{{item.status === 'submission_unknown'}}">提交状态待确认</text><text wx:else>{{item.progress}}%</text><text>{{item.tokenCost}} 创作点 〉</text></view>
       </view>
     </view>
   </view>

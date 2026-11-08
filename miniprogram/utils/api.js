@@ -176,7 +176,8 @@ async function getTask(id) {
 async function uploadMedia(filePath, kind) {
   await requirePrivacyReady()
   if (isDemoMode()) return { fileId: filePath, tempPath: filePath, kind }
-  const suffix = filePath.split('.').pop() || (kind === 'video' ? 'mp4' : 'jpg')
+  const extension = /\.([a-z0-9]{2,5})(?:[?#]|$)/i.exec(String(filePath || ''))
+  const suffix = extension ? extension[1].toLowerCase() : (kind === 'video' ? 'mp4' : 'jpg')
   const cloudPath = `ipcamp/${kind}/${Date.now()}_${Math.random().toString(16).slice(2)}.${suffix}`
   const result = await wx.cloud.uploadFile({ cloudPath, filePath })
   return { fileId: result.fileID, tempPath: filePath, kind }

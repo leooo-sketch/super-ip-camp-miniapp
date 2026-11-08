@@ -19,6 +19,20 @@ WORKER_TOKEN=必须与ipcamp-api中的WORKER_TOKEN完全一致
 
 - 不要把 `KLING_API_KEY` 写入 `miniprogram/config.js` 或任何前端文件。
 
+## Hy-Video-1.5（`ipcamp-api`）
+
+以下配置由管理员在 CloudBase 控制台手动设置。Hy 文生视频和图生视频按工作流独立选路，现有工作流的 `VIDEO_PROVIDER` 不需要切换。
+
+```text
+TOKENHUB_API_KEY=请仅在CloudBase控制台填写真实密钥
+TOKENHUB_BASE_URL=https://tokenhub.tencentmaas.com
+TOKENHUB_VIDEO_MODEL=hy-video-v1.5
+TOKENHUB_DAILY_TASK_LIMIT=20
+TOKENHUB_MAX_ACTIVE_TASKS=3
+```
+
+启用前还需在腾讯云 TokenHub 控制台确认模型权限及后付费设置。不要把真实 Key 写入本文件或 Git 仓库。详细步骤见 `docs/hy-video-1.5-integration.md`。
+
 ## 通过 Dify 编排（推荐）
 
 ```text

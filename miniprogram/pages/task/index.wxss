@@ -7,10 +7,13 @@
 .status-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 26rpx; }
 .status-label { color: #147d78; font-size: 23rpx; font-weight: 750; }
 .status-processing .status-label,.status-queued .status-label { color: #8b6504; }
+.status-submission_unknown { border-top-color: #c47b08; }
+.status-submission_unknown .status-label { color: #875100; }
 .status-failed .status-label { color: #b92520; }
 .task-title { margin-top: 7rpx; font-size: 34rpx; font-weight: 800; }
 .progress-number { font-size: 38rpx; font-weight: 800; }
 .status-note { margin-top: 18rpx; color: #73777f; font-size: 21rpx; line-height: 1.5; }
+.status-warning { color: #875100; font-weight: 650; }
 .result-section { margin-top: 22rpx; }
 .video-shell { position: relative; width: 100%; height: 820rpx; }
 .result-video,.demo-result { width: 100%; height: 820rpx; border-radius: 12rpx; background: #151719; }
@@ -29,3 +32,6 @@
 .detail-value { max-width: 430rpx; color: #151719; text-align: right; }
 .code { color: #147d78; font-family: monospace; font-size: 19rpx; }
 .works-button { margin-top: 22rpx; height: 84rpx; color: #151719; background: #fff; border: 1rpx solid #d9dce0; line-height: 84rpx; }
+.save-button { margin-top: 16rpx; height: 84rpx; color: #fff; background: #147d78; line-height: 84rpx; }
+.again-button { margin-top: 16rpx; height: 84rpx; color: #147d78; background: #eef8f7; line-height: 84rpx; }
+.again-note { margin-top: 12rpx; color: #73777f; font-size: 20rpx; line-height: 1.5; }

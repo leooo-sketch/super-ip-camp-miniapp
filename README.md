@@ -7,15 +7,16 @@
 ```text
 微信小程序
   → CloudBase ipcamp-api / ipcamp-worker
-  → Dify Workflow
-  → HTTPS /v1/tasks/dispatch
-  → Python 模型服务
-  → 可灵等模型供应商
+  → 按工作流与任务保存的 Provider 路由
+      ├─ 腾讯云 TokenHub / Hy-Video-1.5（文生视频、图生视频）
+      └─ 现有 Dify / 可灵 / Vidu 等 Provider
   → CloudBase tasks
   → 小程序任务页与作品页
 ```
 
-小程序前端不保存 Dify Key、模型 Key 或内部令牌。CloudBase 继续负责用户、任务、创作点、退款和轮询，Dify 只负责 AI 工作流编排。
+小程序前端不保存 Dify Key、模型 Key 或内部令牌。CloudBase 继续负责用户、任务、创作点、退款和轮询；选择 Dify 的工作流仍由 Dify 进行 AI 编排。
+
+Hy-Video-1.5 的两条工作流直接通过服务端 TokenHub Provider 创建异步任务；现有 Dify 与其他 Provider 路由保留。接入方式、环境变量、Mock 验证及人工部署步骤见 [Hy-Video-1.5 接入说明](docs/hy-video-1.5-integration.md)。
 
 ## 目录
 
@@ -69,7 +70,7 @@ python-model-service/langgraph.json
 
 ## 当前能力边界
 
-真实模型 Provider 当前只完成 `viral-film`（爆款剧情短片）的可灵调用契约；其余工作流应在模型契约、成本和合规测试完成后逐个开放。默认 `MODEL_PROVIDER=mock`，便于无密钥联调。
+公开仓库原有 `viral-film` 可灵调用契约及 Dify/Vidu 路由仍保留。本分支增加 `hy-text-video`、`hy-image-video` 的 TokenHub 契约和 Mock 测试。`python-model-service` 默认 `MODEL_PROVIDER=mock`，便于无密钥联调；这不等于 CloudBase 的 Hy 工作流已经在真实账号开通或完成付费测试。正式启用仍需要管理员配置 TokenHub、CloudBase 与微信审核所需材料。
 
 ## License
 

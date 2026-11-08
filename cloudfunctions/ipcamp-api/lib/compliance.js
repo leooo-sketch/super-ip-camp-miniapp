@@ -24,6 +24,17 @@ function validatePayload(payload, workflow) {
   if (mediaIds.some((value) => !String(value).startsWith('cloud://'))) {
     throw new Error('素材必须先上传到当前小程序的云存储')
   }
+  if (workflow.provider === 'tokenhub-hy') {
+    if (payload.video) throw new Error('混元视频工作流不接受参考视频')
+    if (workflow.providerMode === 'img2video') {
+      if (payload.ratio) throw new Error('图生视频画面比例由图片决定，不能指定比例')
+    } else if (!['9:16', '16:9', '1:1', '4:3', '3:4'].includes(payload.ratio)) {
+      throw new Error('不支持的文生视频画面比例')
+    }
+    if (payload.duration !== undefined && Number(payload.duration) !== 5) throw new Error('混元视频固定为 5 秒')
+    if (payload.resolution !== undefined && payload.resolution !== '720p') throw new Error('混元视频固定为 720p')
+    return { ...payload, topic, images, duration: 5, resolution: '720p', ratio: workflow.providerMode === 'img2video' ? undefined : payload.ratio }
+  }
   if (!['9:16', '16:9', '1:1'].includes(payload.ratio)) throw new Error('不支持的画面比例')
   if (!['720p', '1080p'].includes(payload.resolution)) throw new Error('不支持的清晰度')
   const duration = Number(payload.duration || 10)
